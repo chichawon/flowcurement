@@ -167,9 +167,9 @@
                                             @can('view', $salesOrder)
                                                 <a href="{{ route('sales.orders.show', $salesOrder) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
                                             @endcan
-                                            @can('print', $salesOrder)
+                                            <!-- @can('print', $salesOrder)
                                                 <button type="button" class="block w-full px-4 py-2 text-start text-sm text-slate-400">Print</button>
-                                            @endcan
+                                            @endcan -->
                                             @can('update', $salesOrder)
                                                 <a href="{{ route('sales.orders.edit', $salesOrder) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
                                             @endcan
@@ -264,12 +264,13 @@
                                                             $activeDrItems = $itemRow->deliveryReceiptItems
                                                                 ->filter(fn ($drItem) => optional($drItem->deliveryReceipt)->status !== 'cancelled');
                                                             $latestDrItem = $activeDrItems->sortByDesc('id')->first();
+                                                            $latestDr = $latestDrItem?->deliveryReceipt;
                                                             $deliveredQty = (float) $activeDrItems->sum(fn ($drItem) => (float) ($drItem->delivered_quantity ?? 0));
-                                                            $deliveryNo = (string) ($latestDrItem?->delivery_no ?: $latestDrItem?->deliveryReceipt?->delivery_receipt_no ?: 'Pending DR');
-                                                            $deliveredDateValue = $latestDrItem?->delivered_date ?: $latestDrItem?->deliveryReceipt?->dr_date;
+                                                            $deliveryNo = (string) ($latestDrItem?->delivery_no ?: $latestDr?->delivery_receipt_no ?: 'Pending DR');
+                                                            $deliveredDateValue = $latestDr?->received_date ?: $latestDrItem?->delivered_date ?: $latestDr?->dr_date;
                                                             $deliveredDate = $deliveredDateValue ? \Illuminate\Support\Carbon::parse($deliveredDateValue)->format('M d, Y') : 'Pending DR';
-                                                            $deliveredBy = (string) ($latestDrItem?->delivered_by ?: 'Pending DR');
-                                                            $receivedBy = (string) ($latestDrItem?->received_by ?: 'Pending DR');
+                                                            $deliveredBy = (string) ($latestDr?->delivered_by ?: $latestDrItem?->delivered_by ?: 'Pending DR');
+                                                            $receivedBy = (string) ($latestDr?->received_by ?: $latestDrItem?->received_by ?: 'Pending DR');
                                                         @endphp
                                                         <tr class="text-slate-700">
                                                             <td class="px-2 py-2 font-medium text-slate-900">{{ $itemRow->item?->item_name ?? 'N/A' }}</td>

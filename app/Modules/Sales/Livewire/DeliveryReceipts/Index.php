@@ -33,16 +33,17 @@ class Index extends Component
     public function updatingDateTo(): void { $this->resetPage(); }
     public function updatingPerPage(): void { $this->resetPage(); }
 
-    public function openUploadDetails(int $deliveryReceiptId): void
+    public function openUploadDetails(int $deliveryReceiptId): mixed
     {
         $receipt = DeliveryReceipt::query()->find($deliveryReceiptId);
         if (! $receipt) {
             session()->flash('toast', 'Delivery receipt no longer exists.');
-            return;
+            return null;
         }
 
         $this->authorize('update', $receipt);
-        session()->flash('toast', 'Upload details will be available soon.');
+
+        return redirect()->route('sales.delivery-receipts.upload-details', $receipt);
     }
 
     public function promptVoidReceipt(int $deliveryReceiptId): void

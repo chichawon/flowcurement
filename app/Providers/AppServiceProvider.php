@@ -34,6 +34,7 @@ use App\Modules\Sales\Livewire\Orders\Index as SalesOrderIndex;
 use App\Modules\Sales\Livewire\DeliveryReceipts\Create as DeliveryReceiptCreate;
 use App\Modules\Sales\Livewire\DeliveryReceipts\Edit as DeliveryReceiptEdit;
 use App\Modules\Sales\Livewire\DeliveryReceipts\Index as DeliveryReceiptIndex;
+use App\Modules\Sales\Livewire\DeliveryReceipts\UploadDetails as DeliveryReceiptUploadDetails;
 use App\Modules\Sales\Models\DeliveryReceipt;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Policies\DeliveryReceiptPolicy;
@@ -95,6 +96,7 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('sales.delivery-receipts.index', DeliveryReceiptIndex::class);
         Livewire::component('sales.delivery-receipts.create', DeliveryReceiptCreate::class);
         Livewire::component('sales.delivery-receipts.edit', DeliveryReceiptEdit::class);
+        Livewire::component('sales.delivery-receipts.upload-details', DeliveryReceiptUploadDetails::class);
         Livewire::component('user-management.users-index', UsersIndex::class);
 
         $this->app->booted(function (): void {

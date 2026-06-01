@@ -5,6 +5,7 @@ namespace App\Modules\Sales\Services;
 use App\Modules\AuditTrail\Services\AuditTrailService;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Sales\Models\DeliveryReceipt;
+use App\Modules\Sales\Models\DeliveryReceiptAttachment;
 use App\Modules\Sales\Models\DeliveryReceiptItem;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Models\SalesOrderItem;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DeliveryReceiptService
@@ -78,12 +80,18 @@ class DeliveryReceiptService
 
         $previouslyDeliveredMap = $this->deliveredTotalsBySalesOrderItem($salesOrder->id);
         $rows = $salesOrder->items
-            ->map(function (SalesOrderItem $row) use ($previouslyDeliveredMap): array {
+            ->map(function (SalesOrderItem $row) use ($previouslyDeliveredMap): ?array {
                 $ordered = (float) $row->order_quantity;
                 $previouslyDelivered = max((float) ($previouslyDeliveredMap[$row->id] ?? 0), 0);
                 $derivedRemaining = max($ordered - $previouslyDelivered, 0);
                 $storedRemaining = max((float) ($row->balance_quantity ?? 0), 0);
                 $remaining = max($derivedRemaining, $storedRemaining);
+
+                // Hide fully served lines in DR items panel.
+                if ($remaining <= 0) {
+                    return null;
+                }
+
                 $available = max((float) ($row->item?->available_stock ?? 0), 0);
                 $deliverable = floor(min($remaining, $available));
                 $delivered = $deliverable;
@@ -113,6 +121,7 @@ class DeliveryReceiptService
                     'remarks' => '',
                 ];
             })
+            ->filter()
             ->values()
             ->all();
 
@@ -168,6 +177,67 @@ class DeliveryReceiptService
             app(AuditTrailService::class)->record(self::MODULE, 'cancelled', $deliveryReceipt, $old, $deliveryReceipt->toArray(), 'Delivery receipt cancelled: '.$deliveryReceipt->delivery_receipt_no);
 
             return $deliveryReceipt->refresh();
+        });
+    }
+
+    public function updateUploadDetails(DeliveryReceipt $deliveryReceipt, array $payload, array $attachments = []): DeliveryReceipt
+    {
+        Gate::authorize('update', $deliveryReceipt);
+
+        return DB::transaction(function () use ($deliveryReceipt, $payload, $attachments): DeliveryReceipt {
+            $old = $deliveryReceipt->load('attachments')->toArray();
+
+            $deliveryReceipt->update([
+                'received_date' => $payload['received_date'],
+                'received_by' => $payload['received_by'],
+                'delivered_by' => $payload['delivered_by'],
+                'updated_by' => auth()->id(),
+            ]);
+
+            foreach ($attachments as $attachment) {
+                $path = $attachment->store('delivery-receipts/attachments', 'public');
+
+                DeliveryReceiptAttachment::query()->create([
+                    'delivery_receipt_id' => $deliveryReceipt->id,
+                    'file_name' => $attachment->getClientOriginalName(),
+                    'file_path' => $path,
+                    'mime_type' => $attachment->getMimeType(),
+                    'file_size' => $attachment->getSize() ?: 0,
+                    'uploaded_by' => auth()->id(),
+                ]);
+            }
+
+            app(AuditTrailService::class)->record(
+                self::MODULE,
+                'upload_details_updated',
+                $deliveryReceipt,
+                $old,
+                $deliveryReceipt->fresh('attachments')->toArray(),
+                'Delivery receipt upload details updated: '.$deliveryReceipt->delivery_receipt_no
+            );
+
+            return $deliveryReceipt->refresh();
+        });
+    }
+
+    public function deleteAttachment(DeliveryReceiptAttachment $attachment): void
+    {
+        Gate::authorize('update', $attachment->deliveryReceipt);
+
+        DB::transaction(function () use ($attachment): void {
+            $old = $attachment->toArray();
+            Storage::disk('public')->delete($attachment->file_path);
+            $deliveryReceipt = $attachment->deliveryReceipt;
+            $attachment->delete();
+
+            app(AuditTrailService::class)->record(
+                self::MODULE,
+                'attachment_deleted',
+                $deliveryReceipt,
+                $old,
+                null,
+                'Delivery receipt attachment deleted: '.$deliveryReceipt->delivery_receipt_no
+            );
         });
     }
 

@@ -16,6 +16,9 @@ class DeliveryReceipt extends Model
     protected $fillable = [
         'delivery_receipt_no',
         'dr_date',
+        'received_date',
+        'received_by',
+        'delivered_by',
         'sales_order_id',
         'sales_order_no',
         'customer_po',
@@ -35,6 +38,7 @@ class DeliveryReceipt extends Model
     {
         return [
             'dr_date' => 'date',
+            'received_date' => 'date',
             'terms' => 'integer',
         ];
     }
@@ -54,9 +58,13 @@ class DeliveryReceipt extends Model
         return $this->hasMany(DeliveryReceiptItem::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(DeliveryReceiptAttachment::class);
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 }
-

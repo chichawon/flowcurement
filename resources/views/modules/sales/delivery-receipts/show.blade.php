@@ -14,9 +14,12 @@
             </div>
             <dl class="erp-panel-body grid gap-4 sm:grid-cols-2">
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">DR Date</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->dr_date?->format('M d, Y') }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase text-slate-500">Received Date</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->received_date?->format('M d, Y') ?? 'Not uploaded' }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Sales Order</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->sales_order_no }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Company</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->company_name }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Contact</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->contact_person }}{{ $deliveryReceipt->contact_no ? ' | '.$deliveryReceipt->contact_no : '' }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase text-slate-500">Received By</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->received_by ?: 'Not uploaded' }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase text-slate-500">Delivered By</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->delivered_by ?: 'Not uploaded' }}</dd></div>
             </dl>
         </section>
 
@@ -53,6 +56,24 @@
                 </div>
             </div>
         </section>
+
+        @if ($deliveryReceipt->attachments->isNotEmpty())
+            <section class="erp-panel">
+                <div class="erp-panel-header"><h3 class="text-sm font-semibold text-slate-950">Attachments</h3></div>
+                <div class="erp-panel-body grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($deliveryReceipt->attachments as $attachment)
+                        <a href="{{ Storage::disk('public')->url($attachment->file_path) }}" target="_blank" class="rounded-md border border-slate-200 bg-slate-50 p-3 hover:border-cyan-300 hover:bg-cyan-50/40">
+                            @if (in_array(strtolower(pathinfo($attachment->file_name, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp'], true))
+                                <img src="{{ Storage::disk('public')->url($attachment->file_path) }}" alt="{{ $attachment->file_name }}" class="h-28 w-full rounded border border-slate-200 bg-white object-contain">
+                            @else
+                                <div class="grid h-28 place-items-center rounded border border-slate-200 bg-white text-sm font-semibold text-red-600">PDF</div>
+                            @endif
+                            <p class="mt-2 truncate text-sm font-semibold text-slate-900">{{ $attachment->file_name }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 
     <div class="sticky bottom-0 mt-5 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-100/95 py-4 backdrop-blur">

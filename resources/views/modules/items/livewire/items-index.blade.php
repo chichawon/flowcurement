@@ -86,7 +86,7 @@
                     <select wire:model.live="item_type" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
                         <option value="">All types</option>
                         @foreach ($itemTypes as $type)
-                            <option value="{{ $type }}">{{ $type }}</option>
+                            <option value="{{ $type->name }}">{{ $type->name }}</option>
                         @endforeach
                     </select>
                 </label>

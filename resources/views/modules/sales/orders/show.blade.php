@@ -61,14 +61,24 @@
                         </thead>
                         <tbody>
                             @foreach ($salesOrder->items as $row)
+                                @php($balance = (float) ($row->balance_quantity ?? $row->order_quantity))
                                 <tr>
-                                    <td class="border border-slate-300 px-2 py-3"><p class="truncate font-semibold text-slate-950">{{ $row->item?->item_name }}</p></td>
+                                    <td class="border border-slate-300 px-2 py-3">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <p class="min-w-0 truncate font-semibold text-slate-950">{{ $row->item?->item_name }}</p>
+                                            @if ($balance <= 0)
+                                                <div class="shrink-0">
+                                                    <span class="inline-flex rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">Complete</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
                                     <td class="border border-slate-300 px-2 py-3 text-slate-700">{{ $row->description }}</td>
                                     <td class="border border-slate-300 px-2 py-3 text-center">{{ number_format((float) $row->order_quantity, 0) }}</td>
                                     <td class="border border-slate-300 px-2 py-3">{{ str($row->unitMeasure?->name)->headline() }}</td>
                                     <td class="border border-slate-300 px-2 py-3 text-right font-semibold">{{ number_format((float) $row->price, 2) }}</td>
                                     <td class="border border-slate-300 px-2 py-3 text-right">{{ number_format((float) $row->available_stock, 2) }}</td>
-                                    <td class="border border-slate-300 px-2 py-3 text-right font-semibold">{{ number_format((float) ($row->balance_quantity ?? $row->order_quantity), 2) }}</td>
+                                    <td class="border border-slate-300 px-2 py-3 text-right font-semibold">{{ number_format($balance, 2) }}</td>
                                     <td class="border border-slate-300 px-2 py-3 text-right font-semibold">{{ number_format((float) $row->total, 2) }}</td>
                                 </tr>
                             @endforeach

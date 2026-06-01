@@ -337,7 +337,7 @@ class SalesOrderService
                 'items.item:id,item_name',
                 'items.unitMeasure:id,name',
                 'items.deliveryReceiptItems:id,delivery_receipt_id,sales_order_item_id,delivered_quantity,delivery_no,delivered_date,delivered_by,received_by',
-                'items.deliveryReceiptItems.deliveryReceipt:id,delivery_receipt_no,status,dr_date',
+                'items.deliveryReceiptItems.deliveryReceipt:id,delivery_receipt_no,status,dr_date,received_date,received_by,delivered_by',
             ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {

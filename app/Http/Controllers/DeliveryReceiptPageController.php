@@ -28,6 +28,7 @@ class DeliveryReceiptPageController extends Controller
                 'items.item:id,item_name',
                 'items.unitMeasure:id,name',
                 'items.salesOrderItem:id,description',
+                'attachments',
                 'creator:id,name',
             ])
             ->find($deliveryReceipt);
@@ -39,6 +40,16 @@ class DeliveryReceiptPageController extends Controller
         Gate::authorize('view', $deliveryReceipt);
 
         return view('modules.sales.delivery-receipts.show', ['deliveryReceipt' => $deliveryReceipt]);
+    }
+
+    public function uploadDetails(int $deliveryReceipt): View|RedirectResponse
+    {
+        $exists = DeliveryReceipt::query()->whereKey($deliveryReceipt)->exists();
+        if (! $exists) {
+            return redirect()->route('sales.delivery-receipts.index')->with('toast', 'Delivery receipt no longer exists.');
+        }
+
+        return view('modules.sales.delivery-receipts.upload-details', ['deliveryReceipt' => $deliveryReceipt]);
     }
 
     public function edit(int $deliveryReceipt): View|RedirectResponse
