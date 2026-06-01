@@ -15,75 +15,67 @@
         <div class="erp-panel-body space-y-4">
             <div class="grid gap-3 lg:grid-cols-4">
                 <button type="button" wire:click="setStatusFilter('')" @class([
-                    'rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition',
+                    'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-emerald-300 hover:shadow',
                     'border-emerald-400 ring-1 ring-emerald-300' => $status === '',
                     'border-slate-200 hover:border-slate-300' => $status !== '',
                 ])>
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-12 place-items-center rounded-full bg-emerald-600 text-white">
-                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5v10.5H3.75V6.75Zm4.5 3h2.25v2.25H8.25V9.75Zm5.25 0h2.25v2.25H13.5V9.75ZM8.25 13.5h2.25v2.25H8.25V13.5Zm5.25 0h2.25v2.25H13.5V13.5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-3xl font-semibold leading-none text-slate-900">{{ $statusCounts['all'] ?? 0 }}</p>
-                            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-slate-600">All Orders</p>
-                        </div>
-                    </div>
+                    <span class="grid size-12 shrink-0 place-items-center rounded-full bg-emerald-600 text-white">
+                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5v10.5H3.75V6.75Zm4.5 3h2.25v2.25H8.25V9.75Zm5.25 0h2.25v2.25H13.5V9.75ZM8.25 13.5h2.25v2.25H8.25V13.5Zm5.25 0h2.25v2.25H13.5V13.5Z" />
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="block text-2xl font-bold leading-7 text-slate-950">{{ $statusCounts['all'] ?? 0 }}</span>
+                        <span class="mt-1 block text-xs font-medium uppercase tracking-wider text-slate-600">All Orders</span>
+                    </span>
                 </button>
 
                 <button type="button" wire:click="setStatusFilter('pending')" @class([
-                    'rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition',
+                    'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-amber-300 hover:shadow',
                     'border-amber-400 ring-1 ring-amber-300' => $status === 'pending',
                     'border-slate-200 hover:border-slate-300' => $status !== 'pending',
                 ])>
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-12 place-items-center rounded-full bg-amber-500 text-white">
-                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-3xl font-semibold leading-none text-slate-900">{{ $statusCounts['pending'] ?? 0 }}</p>
-                            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-slate-600">Pending Orders</p>
-                        </div>
-                    </div>
+                    <span class="grid size-12 shrink-0 place-items-center rounded-full bg-amber-500 text-white">
+                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="block text-2xl font-bold leading-7 text-slate-950">{{ $statusCounts['pending'] ?? 0 }}</span>
+                        <span class="mt-1 block text-xs font-medium uppercase tracking-wider text-slate-600">Pending Orders</span>
+                    </span>
                 </button>
 
                 <button type="button" wire:click="setStatusFilter('partial')" @class([
-                    'rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition',
+                    'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-cyan-300 hover:shadow',
                     'border-cyan-400 ring-1 ring-cyan-300' => $status === 'partial',
                     'border-slate-200 hover:border-slate-300' => $status !== 'partial',
                 ])>
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-12 place-items-center rounded-full bg-cyan-500 text-white">
-                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5 12 3 3 7.5m18 0v9L12 21m9-13.5L12 12m0 9v-9m0 0L3 7.5" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-3xl font-semibold leading-none text-slate-900">{{ $statusCounts['partial'] ?? 0 }}</p>
-                            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-slate-600">Partial Orders</p>
-                        </div>
-                    </div>
+                    <span class="grid size-12 shrink-0 place-items-center rounded-full bg-cyan-500 text-white">
+                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5 12 3 3 7.5m18 0v9L12 21m9-13.5L12 12m0 9v-9m0 0L3 7.5" />
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="block text-2xl font-bold leading-7 text-slate-950">{{ $statusCounts['partial'] ?? 0 }}</span>
+                        <span class="mt-1 block text-xs font-medium uppercase tracking-wider text-slate-600">Partial Orders</span>
+                    </span>
                 </button>
 
                 <button type="button" wire:click="setStatusFilter('served')" @class([
-                    'rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition',
+                    'flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-slate-300 hover:shadow',
                     'border-slate-500 ring-1 ring-slate-300' => $status === 'served',
                     'border-slate-200 hover:border-slate-300' => $status !== 'served',
                 ])>
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-12 place-items-center rounded-full" style="background-color:#64748b;color:#ffffff;">
-                            <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 5.25 5.25L19.5 7.5" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-3xl font-semibold leading-none text-slate-900">{{ $statusCounts['served'] ?? 0 }}</p>
-                            <p class="mt-1 text-sm font-medium uppercase tracking-wider text-slate-600">Served Orders</p>
-                        </div>
-                    </div>
+                    <span class="grid size-12 shrink-0 place-items-center rounded-full" style="background-color:#64748b;color:#ffffff;">
+                        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 5.25 5.25L19.5 7.5" />
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="block text-2xl font-bold leading-7 text-slate-950">{{ $statusCounts['served'] ?? 0 }}</span>
+                        <span class="mt-1 block text-xs font-medium uppercase tracking-wider text-slate-600">Served Orders</span>
+                    </span>
                 </button>
             </div>
 
