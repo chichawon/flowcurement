@@ -237,7 +237,7 @@
                 </table>
             </div>
 
-            @if ($items->hasPages())
+            @if ($items->total() > 0)
                 @php
                     $currentPage = $items->currentPage();
                     $lastPage = $items->lastPage();

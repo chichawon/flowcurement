@@ -303,7 +303,7 @@
                 </table>
             </div>
 
-            @if ($salesOrders->hasPages())
+            @if ($salesOrders->total() > 0)
                 @php
                     $currentPage = $salesOrders->currentPage();
                     $lastPage = $salesOrders->lastPage();

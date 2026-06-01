@@ -45,6 +45,17 @@
                 </label>
             </div>
 
+            <div class="flex items-center justify-end gap-3">
+                <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <span>Rows</span>
+                    <select wire:model.live="perPage" class="rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+            </div>
+
             <div class="relative overflow-visible rounded-lg border border-slate-200">
                 <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
                     <colgroup>
@@ -135,7 +146,7 @@
                 </table>
             </div>
 
-            @if ($users->hasPages())
+            @if ($users->total() > 0)
                 @php
                     $currentPage = $users->currentPage();
                     $lastPage = $users->lastPage();

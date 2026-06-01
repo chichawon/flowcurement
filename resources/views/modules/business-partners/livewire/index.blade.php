@@ -169,7 +169,7 @@
                 </table>
             </div>
 
-            @if ($partners->hasPages())
+            @if ($partners->total() > 0)
                 @php
                     $currentPage = $partners->currentPage();
                     $lastPage = $partners->lastPage();

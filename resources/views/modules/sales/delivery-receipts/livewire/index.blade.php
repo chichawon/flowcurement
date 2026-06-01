@@ -107,7 +107,7 @@
                 </table>
             </div>
 
-            @if ($deliveryReceipts->hasPages())
+            @if ($deliveryReceipts->total() > 0)
                 @php
                     $currentPage = $deliveryReceipts->currentPage();
                     $lastPage = $deliveryReceipts->lastPage();

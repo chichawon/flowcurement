@@ -143,7 +143,7 @@
                 </table>
             </div>
 
-            @if ($quotations->hasPages())
+            @if ($quotations->total() > 0)
                 @php
                     $currentPage = $quotations->currentPage();
                     $lastPage = $quotations->lastPage();
