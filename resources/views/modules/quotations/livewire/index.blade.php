@@ -13,21 +13,11 @@
         </div>
 
         <div class="erp-panel-body space-y-4">
-            <div class="grid gap-3 lg:grid-cols-6">
+            <div class="grid gap-3 lg:grid-cols-5">
                 <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-slate-700" for="quotation-search">Search</label>
                     <input id="quotation-search" type="search" wire:model.live.debounce.350ms="search" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring" placeholder="Quotation no or company">
                 </div>
-
-                <label class="block">
-                    <span class="text-sm font-medium text-slate-700">Status</span>
-                    <select wire:model.live="status" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
-                        <option value="">All statuses</option>
-                        @foreach (\App\Modules\Quotations\Helpers\QuotationOptions::STATUSES as $option)
-                            <option value="{{ $option }}">{{ str($option)->headline() }}</option>
-                        @endforeach
-                    </select>
-                </label>
 
                 <label class="block">
                     <span class="text-sm font-medium text-slate-700">Currency</span>
@@ -79,7 +69,7 @@
                             <th class="px-3 py-3 text-center">Dates</th>
                             <th class="px-3 py-3 text-right">Total</th>
                             <th class="px-3 py-3 text-center">Prepared By</th>
-                            <th class="px-3 py-3 text-center">Status</th>
+                            <th class="px-3 py-3 text-center">Reference</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
@@ -131,7 +121,15 @@
                                     <p class="truncate text-sm text-slate-700">{{ $quotation->preparedBy?->name ?? 'System' }}</p>
                                 </td>
                                 <td class="px-3 py-3 text-center align-middle">
-                                    <x-quotations.status-badge :status="$quotation->status" />
+                                    @if ($quotation->referenceSalesOrder)
+                                        <span class="inline-flex rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
+                                            {{ $quotation->referenceSalesOrder->sales_order_no }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex rounded-full bg-slate-500 px-2.5 py-1 text-xs font-semibold text-white">
+                                            No Reference
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

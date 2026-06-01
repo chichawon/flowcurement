@@ -38,7 +38,7 @@ class Edit extends Component
             'clients' => $service->clients(),
             'availableItems' => $service->activeItems(),
             'unitMeasures' => $service->unitMeasures(),
-            'quotations' => $service->sourceQuotations(),
+            'quotations' => $service->sourceQuotations($this->salesOrderRecord?->quotation_id),
         ]);
     }
 }

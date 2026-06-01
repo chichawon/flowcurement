@@ -23,7 +23,7 @@
             <div class="text-right text-sm text-slate-600">
                 <p>Date: <span class="font-semibold text-slate-950">{{ $quotation->quotation_date?->format('M d, Y') }}</span></p>
                 <p class="mt-1">Valid Until: <span class="font-semibold text-slate-950">{{ $quotation->validity_date?->format('M d, Y') }}</span></p>
-                <p class="mt-1">Status: <span class="font-semibold text-slate-950">{{ str($quotation->status)->headline() }}</span></p>
+                <p class="mt-1">Reference: <span class="font-semibold text-slate-950">{{ $quotation->referenceSalesOrder?->sales_order_no ?? 'No Reference' }}</span></p>
             </div>
         </div>
 

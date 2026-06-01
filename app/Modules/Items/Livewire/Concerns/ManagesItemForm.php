@@ -88,6 +88,15 @@ trait ManagesItemForm
         $this->item_code = strtoupper($value);
     }
 
+    public function updatedItemType(): void
+    {
+        if ($this->itemRecord) {
+            return;
+        }
+
+        $this->refreshGeneratedItemCode();
+    }
+
     public function updatedSupplierPrice(): void
     {
         $this->recalculateItemPrice();
@@ -141,6 +150,7 @@ trait ManagesItemForm
         $itemType = app(ItemService::class)->createItemType($payload['quick_item_type_name']);
 
         $this->item_type = $itemType->name;
+        $this->refreshGeneratedItemCode();
         $this->quick_item_type_name = '';
         $this->showQuickItemTypeModal = false;
     }
@@ -226,6 +236,10 @@ trait ManagesItemForm
 
     public function save(): mixed
     {
+        if (! $this->itemRecord) {
+            $this->refreshGeneratedItemCode();
+        }
+
         $this->recalculateItemPrice();
 
         $payload = $this->validate(
@@ -282,5 +296,16 @@ trait ManagesItemForm
     protected function indexRoute(): string
     {
         return 'items.index';
+    }
+
+    private function refreshGeneratedItemCode(): void
+    {
+        if (blank($this->item_type)) {
+            $this->item_code = '';
+
+            return;
+        }
+
+        $this->item_code = app(ItemService::class)->nextItemCode($this->item_type);
     }
 }

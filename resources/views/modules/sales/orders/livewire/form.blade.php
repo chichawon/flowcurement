@@ -32,7 +32,7 @@
                     <select wire:model.live="business_partner_id" class="mt-1 block h-10 w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
                         <option value="">Select client</option>
                         @foreach ($clients as $client)
-                            <option value="{{ $client->id }}">{{ $client->company_name }}</option>
+                        <option value="{{ $client->id }}">{{ $client->company_name }}</option>
                         @endforeach
                     </select>
                     @error('business_partner_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
@@ -61,10 +61,10 @@
             </div>
 
             @if ($salesOrderRecord)
-                <label class="block lg:max-w-xs">
-                    <span class="text-sm font-medium text-slate-700">Status</span>
-                    <input type="text" value="{{ str($status)->headline() }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-900 shadow-sm">
-                </label>
+            <label class="block lg:max-w-xs">
+                <span class="text-sm font-medium text-slate-700">Status</span>
+                <input type="text" value="{{ str($status)->headline() }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-900 shadow-sm">
+            </label>
             @endif
 
             <label class="block">
@@ -76,12 +76,12 @@
     </section>
 
     @php
-        $savedAttachmentUrl = $existing_po_attachment ? Storage::disk('public')->url($existing_po_attachment) : null;
-        $savedAttachmentName = $existing_po_attachment ? basename($existing_po_attachment) : '';
-        $savedAttachmentExtension = strtolower(pathinfo($savedAttachmentName, PATHINFO_EXTENSION));
-        $savedAttachmentKind = in_array($savedAttachmentExtension, ['jpg', 'jpeg', 'png', 'webp'], true)
-            ? 'image'
-            : ($savedAttachmentExtension === 'pdf' ? 'pdf' : '');
+    $savedAttachmentUrl = $existing_po_attachment ? Storage::disk('public')->url($existing_po_attachment) : null;
+    $savedAttachmentName = $existing_po_attachment ? basename($existing_po_attachment) : '';
+    $savedAttachmentExtension = strtolower(pathinfo($savedAttachmentName, PATHINFO_EXTENSION));
+    $savedAttachmentKind = in_array($savedAttachmentExtension, ['jpg', 'jpeg', 'png', 'webp'], true)
+    ? 'image'
+    : ($savedAttachmentExtension === 'pdf' ? 'pdf' : '');
     @endphp
 
     <section
@@ -109,15 +109,14 @@
             activeUrl() { return this.previewUrl || this.savedUrl || ''; },
             activeName() { return this.fileName || this.savedName || 'No attachment selected'; },
             activeKind() { return this.fileKind || this.savedKind || ''; },
-        }"
-    >
+        }">
         <div class="erp-panel-header flex items-center justify-between gap-3">
             <div>
                 <h3 class="text-sm font-semibold text-slate-950">Customer P.O. Attachment</h3>
                 <p class="mt-1 text-xs text-slate-500">Attach the customer's purchase order for reference.</p>
             </div>
             @if ($existing_po_attachment)
-                <a href="{{ $savedAttachmentUrl }}" target="_blank" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800">View Current</a>
+            <a href="{{ $savedAttachmentUrl }}" target="_blank" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800">View Current</a>
             @endif
         </div>
         <div class="erp-panel-body">
@@ -150,8 +149,7 @@
                     type="button"
                     x-bind:disabled="! activeUrl()"
                     @click="if (activeUrl()) window.open(activeUrl(), '_blank')"
-                    class="inline-flex items-center justify-center rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
-                >
+                    class="inline-flex items-center justify-center rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500">
                     Preview
                 </button>
             </div>
@@ -160,7 +158,7 @@
                 <span wire:loading wire:target="po_attachment_upload" class="font-semibold text-cyan-700">Uploading attachment...</span>
                 <span x-show="previewUrl" x-cloak class="font-semibold text-emerald-700">New attachment selected.</span>
                 @if ($existing_po_attachment)
-                    <a href="{{ $savedAttachmentUrl }}" target="_blank" class="font-semibold text-cyan-700 hover:text-cyan-800">View current attachment</a>
+                <a href="{{ $savedAttachmentUrl }}" target="_blank" class="font-semibold text-cyan-700 hover:text-cyan-800">View current attachment</a>
                 @endif
             </div>
 
@@ -174,19 +172,28 @@
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" wire:click="openQuickItemModal" class="inline-flex items-center rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-700 erp-focus-ring disabled:cursor-not-allowed disabled:opacity-50" @disabled($attachmentOnlyMode)>Add New Item</button>
                 <button type="button" wire:click="openQuotationModal" class="inline-flex items-center rounded-md border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-800 shadow-sm hover:border-cyan-300 hover:bg-cyan-100 erp-focus-ring disabled:cursor-not-allowed disabled:opacity-50" @disabled($attachmentOnlyMode)>Add Items from Quotation</button>
-                <button type="button" wire:click="addRow" class="inline-flex items-center rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 erp-focus-ring disabled:cursor-not-allowed disabled:opacity-50" @disabled($attachmentOnlyMode)>Add Row</button>
+                <button type="button" wire:click="addRow" class="inline-flex items-center rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 erp-focus-ring disabled:cursor-not-allowed disabled:opacity-50" @disabled($attachmentOnlyMode)> <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>Add Row</button>
             </div>
         </div>
         <div class="erp-panel-body">
             @if ($attachmentOnlyMode)
-                <div class="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
-                    Item panel is locked because a Delivery Receipt is already issued. Only P.O. attachment can be updated.
-                </div>
+            <div class="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
+                Item panel is locked because a Delivery Receipt is already issued. Only P.O. attachment can be updated.
+            </div>
             @endif
             <div class="relative overflow-visible border border-slate-400 bg-white">
                 <table class="w-full table-fixed border-collapse text-sm">
                     <colgroup>
-                        <col class="w-[20%]"><col class="w-[18%]"><col class="w-[10%]"><col class="w-[10%]"><col class="w-[12%]"><col class="w-[10%]"><col class="w-[12%]"><col class="w-14">
+                        <col class="w-[20%]">
+                        <col class="w-[18%]">
+                        <col class="w-[10%]">
+                        <col class="w-[10%]">
+                        <col class="w-[12%]">
+                        <col class="w-[10%]">
+                        <col class="w-[12%]">
+                        <col class="w-14">
                     </colgroup>
                     <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
                         <tr>
@@ -202,50 +209,52 @@
                     </thead>
                     <tbody>
                         @foreach ($items as $index => $row)
-                            @php($rowKey = $row['row_key'] ?? $row['_key'] ?? 'row-'.$index)
-                            <tr wire:key="sales-order-item-row-{{ $rowKey }}">
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <select wire:key="sales-order-item-select-{{ $rowKey }}-{{ $row['item_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.item_id" class="block h-9 w-full border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                        <option value="">Select item</option>
-                                        @foreach ($availableItems as $item)
-                                            <option wire:key="sales-order-item-option-{{ $rowKey }}-{{ $item->id }}" value="{{ $item->id }}">{{ $item->item_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('items.'.$index.'.item_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <input type="text" wire:model.blur="items.{{ $index }}.description" class="block h-9 w-full border border-slate-400 px-2 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                    @error('items.'.$index.'.description') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <input type="number" wire:model.live.debounce.250ms="items.{{ $index }}.order_quantity" min="1" step="1" class="block h-9 w-full border border-slate-400 px-2 text-center text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                    @error('items.'.$index.'.order_quantity') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <select wire:key="sales-order-unit-select-{{ $rowKey }}-{{ $row['unit_measure_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.unit_measure_id" class="block h-9 w-full border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                        <option value="">Unit</option>
-                                        @foreach ($unitMeasures as $unit)
-                                            <option wire:key="sales-order-unit-option-{{ $rowKey }}-{{ $unit->id }}" value="{{ $unit->id }}">{{ str($unit->name)->headline() }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('items.'.$index.'.unit_measure_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <input type="number" wire:model.live.debounce.250ms="items.{{ $index }}.price" min="0" step="0.01" class="block h-9 w-full border border-slate-400 bg-white px-2 text-right text-sm font-semibold text-slate-950 erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                    @error('items.'.$index.'.price') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <input type="text" value="{{ number_format((float) ($row['available_stock'] ?? 0), 2) }}" readonly class="block h-9 w-full border border-slate-300 bg-slate-100 px-2 text-right text-sm text-slate-700">
-                                </td>
-                                <td class="border border-slate-300 p-2 align-top">
-                                    <input type="text" value="{{ number_format((float) ($row['total'] ?? 0), 2) }}" readonly class="block h-9 w-full border border-slate-300 bg-slate-100 px-2 text-right text-sm font-semibold text-slate-950">
-                                </td>
-                                <td class="border border-slate-300 p-2 text-center align-top">
-                                    <button type="button" wire:click="removeRow({{ $index }})" class="inline-flex size-9 items-center justify-center border border-red-700 bg-red-600 text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Remove row" @disabled($attachmentOnlyMode)>
-                                        <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-                                    </button>
-                                </td>
-                            </tr>
+                        @php($rowKey = $row['row_key'] ?? $row['_key'] ?? 'row-'.$index)
+                        <tr wire:key="sales-order-item-row-{{ $rowKey }}">
+                            <td class="border border-slate-300 p-2 align-top">
+                                <select wire:key="sales-order-item-select-{{ $rowKey }}-{{ $row['item_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.item_id" class="block h-9 w-full border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                    <option value="">Select item</option>
+                                    @foreach ($availableItems as $item)
+                                    <option wire:key="sales-order-item-option-{{ $rowKey }}-{{ $item->id }}" value="{{ $item->id }}">{{ $item->item_name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('items.'.$index.'.item_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="text" wire:model.blur="items.{{ $index }}.description" class="block h-9 w-full border border-slate-400 px-2 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                @error('items.'.$index.'.description') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="number" wire:model.live.debounce.250ms="items.{{ $index }}.order_quantity" min="1" step="1" class="block h-9 w-full border border-slate-400 px-2 text-center text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                @error('items.'.$index.'.order_quantity') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <select wire:key="sales-order-unit-select-{{ $rowKey }}-{{ $row['unit_measure_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.unit_measure_id" class="block h-9 w-full border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                    <option value="">Unit</option>
+                                    @foreach ($unitMeasures as $unit)
+                                    <option wire:key="sales-order-unit-option-{{ $rowKey }}-{{ $unit->id }}" value="{{ $unit->id }}">{{ str($unit->name)->headline() }}</option>
+                                    @endforeach
+                                </select>
+                                @error('items.'.$index.'.unit_measure_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="number" wire:model.live.debounce.250ms="items.{{ $index }}.price" min="0" step="0.01" class="block h-9 w-full border border-slate-400 bg-white px-2 text-right text-sm font-semibold text-slate-950 erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                @error('items.'.$index.'.price') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="text" value="{{ number_format((float) ($row['available_stock'] ?? 0), 2) }}" readonly class="block h-9 w-full border border-slate-300 bg-slate-100 px-2 text-right text-sm text-slate-700">
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="text" value="{{ number_format((float) ($row['total'] ?? 0), 2) }}" readonly class="block h-9 w-full border border-slate-300 bg-slate-100 px-2 text-right text-sm font-semibold text-slate-950">
+                            </td>
+                            <td class="border border-slate-300 p-2 text-center align-top">
+                                <button type="button" wire:click="removeRow({{ $index }})" class="inline-flex size-9 items-center justify-center border border-red-700 bg-red-600 text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Remove row" @disabled($attachmentOnlyMode)>
+                                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -272,14 +281,26 @@
             <div class="overflow-hidden border border-slate-400 bg-white">
                 <table class="w-full table-fixed border-collapse text-sm">
                     <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
-                        <tr><th class="border border-slate-400 px-3 py-2 text-left">Summary</th><th class="border border-slate-400 px-3 py-2 text-right">Amount</th></tr>
+                        <tr>
+                            <th class="border border-slate-400 px-3 py-2 text-left">Summary</th>
+                            <th class="border border-slate-400 px-3 py-2 text-right">Amount</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Subtotal</td><td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($subtotal, 2) }}</td></tr>
-                        <tr><td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount</td><td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($tax_amount, 2) }}</td></tr>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Subtotal</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($subtotal, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($tax_amount, 2) }}</td>
+                        </tr>
                     </tbody>
                     <tfoot>
-                        <tr class="bg-slate-950 text-white"><td class="border border-slate-950 px-3 py-3 text-sm font-bold uppercase">Total Amount</td><td class="border border-slate-950 px-3 py-3 text-right text-base font-bold">{{ number_format($total_amount, 2) }}</td></tr>
+                        <tr class="bg-slate-950 text-white">
+                            <td class="border border-slate-950 px-3 py-3 text-sm font-bold uppercase">Total Amount</td>
+                            <td class="border border-slate-950 px-3 py-3 text-right text-base font-bold">{{ number_format($total_amount, 2) }}</td>
+                        </tr>
                     </tfoot>
                 </table>
             </div>
@@ -294,9 +315,14 @@
     <div x-data="{ open: @entangle('showQuickItemModal').live }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
         <div class="absolute inset-0 bg-slate-950/60" @click="$wire.closeQuickItemModal()"></div>
         <div class="relative w-full max-w-lg rounded-xl bg-white shadow-2xl">
-            <div class="border-b border-slate-200 px-5 py-4"><h3 class="text-base font-semibold text-slate-950">Add New Item</h3></div>
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h3 class="text-base font-semibold text-slate-950">Add New Item</h3>
+            </div>
             <div class="space-y-4 px-5 py-4">
-                <x-admin.select-field label="Origin" name="quick_item_source" wire:model.live="quick_item_source"><option value="local">Local</option><option value="import">Imported</option></x-admin.select-field>
+                <x-admin.select-field label="Origin" name="quick_item_source" wire:model.live="quick_item_source">
+                    <option value="local">Local</option>
+                    <option value="import">Imported</option>
+                </x-admin.select-field>
                 <x-admin.form-field label="Item Name" name="quick_item_name" wire:model.blur="quick_item_name" />
                 <div class="grid gap-3 sm:grid-cols-3">
                     <x-admin.form-field label="Supplier Price" name="quick_supplier_price" type="number" step="0.01" wire:model.live="quick_supplier_price" />
@@ -311,12 +337,14 @@
     <div x-data="{ open: @entangle('showQuotationModal').live }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
         <div class="absolute inset-0 bg-slate-950/60" @click="$wire.closeQuotationModal()"></div>
         <div class="relative w-full max-w-lg rounded-xl bg-white shadow-2xl">
-            <div class="border-b border-slate-200 px-5 py-4"><h3 class="text-base font-semibold text-slate-950">Add Items from Quotation</h3></div>
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h3 class="text-base font-semibold text-slate-950">Add Items from Quotation</h3>
+            </div>
             <div class="px-5 py-4">
                 <x-admin.select-field label="Quotation" name="selected_quotation_id" wire:model.live="selected_quotation_id">
                     <option value="">Select quotation</option>
                     @foreach ($quotations as $quotation)
-                        <option value="{{ $quotation->id }}">{{ $quotation->quotation_no }} - {{ $quotation->businessPartner?->company_name }}</option>
+                    <option value="{{ $quotation->id }}">{{ $quotation->quotation_no }} - {{ $quotation->businessPartner?->company_name }}</option>
                     @endforeach
                 </x-admin.select-field>
                 @error('selected_quotation_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror

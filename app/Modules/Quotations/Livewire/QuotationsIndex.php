@@ -15,8 +15,6 @@ class QuotationsIndex extends Component
 
     public string $search = '';
 
-    public string $status = '';
-
     public string $currency = '';
 
     public string $date_from = '';
@@ -37,7 +35,6 @@ class QuotationsIndex extends Component
     }
 
     public function updatingSearch(): void { $this->resetPage(); }
-    public function updatingStatus(): void { $this->resetPage(); }
     public function updatingCurrency(): void { $this->resetPage(); }
     public function updatingDateFrom(): void { $this->resetPage(); }
     public function updatingDateTo(): void { $this->resetPage(); }
@@ -86,14 +83,6 @@ class QuotationsIndex extends Component
         $this->resetDeleteConfirmationState();
     }
 
-    public function markApproved(int $quotationId): void
-    {
-        $quotation = Quotation::query()->findOrFail($quotationId);
-        $this->authorize('approve', $quotation);
-        app(QuotationService::class)->status($quotation, 'approved');
-        session()->flash('toast', 'Quotation approved successfully.');
-    }
-
     public function cancelDeleteConfirmation(): void
     {
         $this->resetDeleteConfirmationState();
@@ -111,7 +100,6 @@ class QuotationsIndex extends Component
         return view('modules.quotations.livewire.index', [
             'quotations' => app(QuotationService::class)->paginate([
                 'search' => $this->search,
-                'status' => $this->status,
                 'currency' => $this->currency,
                 'date_from' => $this->date_from,
                 'date_to' => $this->date_to,

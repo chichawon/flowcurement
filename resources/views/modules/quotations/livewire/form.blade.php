@@ -115,12 +115,17 @@
     <section class="erp-panel">
         <div class="erp-panel-header flex items-center justify-between gap-3">
             <h3 class="text-sm font-semibold text-slate-950">Item Rows</h3>
-            <button type="button" wire:click="addRow" class="inline-flex items-center gap-1.5 rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-700 erp-focus-ring">
-                <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Add Row
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" wire:click="openQuickItemModal" class="inline-flex items-center rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-700 erp-focus-ring">
+                    Add New Item
+                </button>
+                <button type="button" wire:click="addRow" class="inline-flex items-center gap-1.5 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 erp-focus-ring">
+                    <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Row
+                </button>
+            </div>
         </div>
 
         <div class="erp-panel-body">
@@ -258,16 +263,6 @@
                 </x-admin.select-field>
             </div>
 
-            @if ($quotationRecord)
-                <div class="max-w-xs">
-                    <x-admin.select-field label="Status" name="status" wire:model.live="status" required>
-                        @foreach (\App\Modules\Quotations\Helpers\QuotationOptions::STATUSES as $option)
-                            <option value="{{ $option }}">{{ str($option)->headline() }}</option>
-                        @endforeach
-                    </x-admin.select-field>
-                </div>
-            @endif
-
             <div class="overflow-hidden border border-slate-400 bg-white">
                 <table class="w-full table-fixed border-collapse text-sm">
                     <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
@@ -290,5 +285,22 @@
         <button type="submit" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm erp-focus-ring hover:bg-slate-800">
             {{ $submitLabel }}
         </button>
+    </div>
+
+    <div x-data="{ open: @entangle('showQuickItemModal').live }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-slate-950/60" @click="$wire.closeQuickItemModal()"></div>
+        <div class="relative w-full max-w-lg rounded-xl bg-white shadow-2xl">
+            <div class="border-b border-slate-200 px-5 py-4"><h3 class="text-base font-semibold text-slate-950">Add New Item</h3></div>
+            <div class="space-y-4 px-5 py-4">
+                <x-admin.select-field label="Origin" name="quick_item_source" wire:model.live="quick_item_source"><option value="local">Local</option><option value="import">Imported</option></x-admin.select-field>
+                <x-admin.form-field label="Item Name" name="quick_item_name" wire:model.blur="quick_item_name" />
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <x-admin.form-field label="Supplier Price" name="quick_supplier_price" type="number" step="0.01" wire:model.live="quick_supplier_price" />
+                    <x-admin.form-field label="Markup %" name="quick_markup_percentage" type="number" step="0.01" wire:model.live="quick_markup_percentage" />
+                    <label class="block"><span class="text-sm font-medium text-slate-700">Item Price</span><input type="text" value="{{ $quick_item_price }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-950 shadow-sm"></label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4"><button type="button" wire:click="closeQuickItemModal" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Cancel</button><button type="button" wire:click="createQuickItem" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Add Item</button></div>
+        </div>
     </div>
 </form>

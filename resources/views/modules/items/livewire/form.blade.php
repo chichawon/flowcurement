@@ -7,7 +7,14 @@
             <div class="erp-panel-body space-y-4">
                 <div class="grid gap-3 lg:grid-cols-3">
                     <x-admin.form-field label="Item Name" name="item_name" wire:model.blur="item_name" required />
-                    <x-admin.form-field label="Item Code" name="item_code" wire:model.blur="item_code" class="uppercase" maxlength="100" required />
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Item Code</span>
+                        <input type="text" wire:model="item_code" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold uppercase text-slate-950 shadow-sm">
+                        <span class="mt-1 block text-xs text-slate-500">Auto-generated based on selected item type.</span>
+                        @error('item_code')
+                            <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span>
+                        @enderror
+                    </label>
                     <label class="block">
                         <span class="flex items-center justify-between gap-3">
                             <span class="text-sm font-medium text-slate-700">Item Type</span>

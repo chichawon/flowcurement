@@ -283,6 +283,11 @@ trait ManagesSalesOrderForm
             return;
         }
 
+        if ($quotation->reference_sales_order_id && (int) $quotation->reference_sales_order_id !== (int) ($this->salesOrderRecord?->id ?? 0)) {
+            $this->addError('selected_quotation_id', 'Quotation is already used as reference.');
+            return;
+        }
+
         $loaded = app(SalesOrderService::class)->quotationRows($quotation);
         foreach ($loaded['customer'] as $key => $value) {
             $this->{$key} = $value;

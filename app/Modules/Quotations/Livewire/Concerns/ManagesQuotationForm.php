@@ -8,6 +8,7 @@ use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Requests\StoreQuotationRequest;
 use App\Modules\Quotations\Requests\UpdateQuotationRequest;
 use App\Modules\Quotations\Services\QuotationService;
+use Illuminate\Validation\Rule;
 
 trait ManagesQuotationForm
 {
@@ -37,8 +38,6 @@ trait ManagesQuotationForm
 
     public string $tax_rate = '0';
 
-    public string $status = 'draft';
-
     public float $subtotal = 0;
 
     public float $tax_amount = 0;
@@ -46,6 +45,18 @@ trait ManagesQuotationForm
     public float $total_amount = 0;
 
     public array $items = [];
+
+    public bool $showQuickItemModal = false;
+
+    public string $quick_item_source = 'local';
+
+    public string $quick_item_name = '';
+
+    public string $quick_supplier_price = '0.00';
+
+    public string $quick_markup_percentage = '0.00';
+
+    public string $quick_item_price = '0.00';
 
     protected function formRules(): array
     {
@@ -95,7 +106,6 @@ trait ManagesQuotationForm
         $this->remarks = (string) $quotation->remarks;
         $this->currency = $quotation->currency;
         $this->tax_rate = (string) (float) $quotation->tax_rate;
-        $this->status = $quotation->status;
         $this->items = $quotation->items->map(fn ($item): array => [
             'item_id' => (string) $item->item_id,
             'description' => (string) $item->description,
@@ -145,6 +155,69 @@ trait ManagesQuotationForm
         $this->recalculateTotals();
     }
 
+    public function openQuickItemModal(): void
+    {
+        $this->authorize('create', Item::class);
+        $this->showQuickItemModal = true;
+    }
+
+    public function closeQuickItemModal(): void
+    {
+        $this->showQuickItemModal = false;
+        $this->resetValidation(['quick_item_name', 'quick_supplier_price', 'quick_markup_percentage']);
+    }
+
+    public function updatedQuickSupplierPrice(): void
+    {
+        $this->recalculateQuickItemPrice();
+    }
+
+    public function updatedQuickMarkupPercentage(): void
+    {
+        $this->recalculateQuickItemPrice();
+    }
+
+    public function createQuickItem(): void
+    {
+        $this->authorize('create', Item::class);
+
+        $payload = $this->validate([
+            'quick_item_source' => ['required', Rule::in(['local', 'import'])],
+            'quick_item_name' => ['required', 'string', 'max:255'],
+            'quick_supplier_price' => ['required', 'numeric', 'min:0'],
+            'quick_markup_percentage' => ['required', 'numeric', 'min:0'],
+        ], [], [
+            'quick_item_source' => 'item origin',
+            'quick_item_name' => 'item name',
+            'quick_supplier_price' => 'supplier price',
+            'quick_markup_percentage' => 'markup percentage',
+        ]);
+
+        $item = app(QuotationService::class)->createQuickItem([
+            'item_source' => $payload['quick_item_source'],
+            'item_name' => $payload['quick_item_name'],
+            'supplier_price' => $payload['quick_supplier_price'],
+            'percentage' => $payload['quick_markup_percentage'],
+        ]);
+
+        $this->items[] = [
+            'item_id' => (string) $item->id,
+            'description' => $item->item_name,
+            'unit_measure_id' => '',
+            'item_price' => number_format((float) $item->item_price, 2, '.', ''),
+            'quantity' => '1',
+            'total' => number_format((float) $item->item_price, 2, '.', ''),
+        ];
+
+        $this->quick_item_name = '';
+        $this->quick_supplier_price = '0.00';
+        $this->quick_markup_percentage = '0.00';
+        $this->quick_item_price = '0.00';
+        $this->showQuickItemModal = false;
+
+        $this->recalculateTotals();
+    }
+
     public function removeRow(int $index): void
     {
         if (count($this->items) === 1) {
@@ -166,7 +239,6 @@ trait ManagesQuotationForm
         $payload['contact_person'] = $this->contact_person;
         $payload['contact_no'] = $this->contact_no;
         $payload['prepared_by'] = $this->quotationRecord?->prepared_by ?? auth()->id();
-        $payload['status'] = $this->status;
         $payload['updated_by'] = auth()->id();
 
         if ($this->quotationRecord) {
@@ -238,5 +310,10 @@ trait ManagesQuotationForm
         $this->subtotal = $totals['subtotal'];
         $this->tax_amount = $totals['tax_amount'];
         $this->total_amount = $totals['total_amount'];
+    }
+
+    private function recalculateQuickItemPrice(): void
+    {
+        $this->quick_item_price = number_format(app(\App\Modules\Items\Services\ItemPricingService::class)->compute($this->quick_supplier_price, $this->quick_markup_percentage), 2, '.', '');
     }
 }

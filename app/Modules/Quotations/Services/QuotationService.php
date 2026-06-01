@@ -5,6 +5,7 @@ namespace App\Modules\Quotations\Services;
 use App\Modules\AuditTrail\Services\AuditTrailService;
 use App\Modules\BusinessPartners\Models\BusinessPartner;
 use App\Modules\Items\Models\Item;
+use App\Modules\Items\Services\ItemPricingService;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Models\UnitMeasure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class QuotationService
 {
@@ -20,14 +22,13 @@ class QuotationService
     public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         return Quotation::query()
-            ->with(['businessPartner:id,company_name,type', 'preparedBy:id,name'])
+            ->with(['businessPartner:id,company_name,type', 'preparedBy:id,name', 'referenceSalesOrder:id,sales_order_no'])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('quotation_no', 'like', "%{$search}%")
                         ->orWhereHas('businessPartner', fn (Builder $partner) => $partner->where('company_name', 'like', "%{$search}%"));
                 });
             })
-            ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($filters['currency'] ?? null, fn (Builder $query, string $currency) => $query->where('currency', $currency))
             ->when($filters['date_from'] ?? null, fn (Builder $query, string $date) => $query->whereDate('quotation_date', '>=', $date))
             ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('quotation_date', '<=', $date))
@@ -128,6 +129,35 @@ class QuotationService
     public function unitMeasures(): Collection
     {
         return UnitMeasure::query()->where('status', 'active')->orderBy('name')->get(['id', 'name']);
+    }
+
+    public function createQuickItem(array $data): Item
+    {
+        return DB::transaction(function () use ($data): Item {
+            $price = app(ItemPricingService::class)->compute($data['supplier_price'], $data['percentage']);
+            $supplierId = BusinessPartner::query()->suppliers()->value('id');
+
+            $item = Item::query()->create([
+                'item_name' => $data['item_name'],
+                'item_code' => strtoupper($data['item_code'] ?? 'QT-'.Str::upper(Str::random(8))),
+                'item_type' => $data['item_type'] ?? 'Product Consumable',
+                'item_source' => $data['item_source'],
+                'supplier_id' => $supplierId,
+                'supplier_price' => (float) $data['supplier_price'],
+                'percentage' => (float) $data['percentage'],
+                'item_price' => $price,
+                'available_stock' => 0,
+                'reorder_point' => 0,
+                'taxable' => 'no',
+                'status' => 'active',
+                'created_by' => auth()->id(),
+                'updated_by' => auth()->id(),
+            ]);
+
+            app(AuditTrailService::class)->record(self::MODULE, 'quick_item_created', $item, null, $item->getAttributes(), 'Item created from quotation: '.$item->item_name);
+
+            return $item;
+        });
     }
 
     private function headerPayload(array $data, bool $creating = true): array

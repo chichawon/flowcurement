@@ -4,6 +4,7 @@ namespace App\Modules\Quotations\Models;
 
 use App\Models\User;
 use App\Modules\BusinessPartners\Models\BusinessPartner;
+use App\Modules\Sales\Models\SalesOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,7 @@ class Quotation extends Model
         'quotation_no', 'quotation_date', 'validity_date', 'business_partner_id',
         'company_address', 'contact_person', 'contact_no', 'agent_name', 'prepared_by',
         'remarks', 'currency', 'tax_rate', 'subtotal', 'tax_amount', 'total_amount',
-        'status', 'created_by', 'updated_by',
+        'status', 'reference_sales_order_id', 'created_by', 'updated_by',
     ];
 
     protected function casts(): array
@@ -55,5 +56,10 @@ class Quotation extends Model
     public function items(): HasMany
     {
         return $this->hasMany(QuotationItem::class);
+    }
+
+    public function referenceSalesOrder(): BelongsTo
+    {
+        return $this->belongsTo(SalesOrder::class, 'reference_sales_order_id');
     }
 }

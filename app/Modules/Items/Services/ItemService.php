@@ -115,6 +115,10 @@ class ItemService
     public function create(array $data): Item
     {
         return DB::transaction(function () use ($data): Item {
+            if (blank($data['item_code'] ?? null) && filled($data['item_type'] ?? null)) {
+                $data['item_code'] = $this->nextItemCode((string) $data['item_type']);
+            }
+
             $item = Item::query()->create($this->payload($data));
 
             app(AuditTrailService::class)->record(
@@ -137,6 +141,10 @@ class ItemService
     {
         return DB::transaction(function () use ($item, $data): Item {
             $oldValues = $item->getOriginal();
+
+            if (blank($data['item_code'] ?? null) && filled($data['item_type'] ?? null)) {
+                $data['item_code'] = $this->nextItemCode((string) $data['item_type']);
+            }
 
             $item->update($this->payload($data, false));
             $item->refresh();
@@ -217,6 +225,29 @@ class ItemService
         });
     }
 
+    public function nextItemCode(string $itemType): string
+    {
+        $prefix = $this->itemTypePrefix($itemType);
+
+        return DB::transaction(function () use ($prefix): string {
+            $codes = Item::query()
+                ->where('item_code', 'like', $prefix.'-%')
+                ->lockForUpdate()
+                ->pluck('item_code');
+
+            $maxSeries = 0;
+            foreach ($codes as $code) {
+                if (preg_match('/^'.preg_quote($prefix, '/').'\-(\d+)$/', (string) $code, $matches) === 1) {
+                    $maxSeries = max($maxSeries, (int) $matches[1]);
+                }
+            }
+
+            $next = $maxSeries + 1;
+
+            return sprintf('%s-%04d', $prefix, $next);
+        });
+    }
+
     /**
      * @param array<string, mixed> $data
      * @return array<string, mixed>
@@ -255,5 +286,29 @@ class ItemService
         }
 
         return $payload;
+    }
+
+    private function itemTypePrefix(string $itemType): string
+    {
+        $words = collect(preg_split('/\s+/', strtoupper(trim($itemType))) ?: [])
+            ->filter()
+            ->values();
+
+        if ($words->isEmpty()) {
+            return 'ITEM';
+        }
+
+        if ($words->count() === 1) {
+            return substr($words->first(), 0, 4);
+        }
+
+        $first = (string) $words->first();
+        $prefix = substr($first, 0, 3);
+
+        for ($i = 1; $i < $words->count() && strlen($prefix) < 4; $i++) {
+            $prefix .= substr((string) $words[$i], 0, 1);
+        }
+
+        return str_pad(substr($prefix, 0, 4), 3, 'X');
     }
 }

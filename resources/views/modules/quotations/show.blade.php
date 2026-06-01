@@ -11,7 +11,15 @@
             <section class="erp-panel">
                 <div class="erp-panel-header flex items-center justify-between gap-3">
                     <h3 class="text-sm font-semibold text-slate-950">Client Information</h3>
-                    <x-quotations.status-badge :status="$quotation->status" />
+                    @if ($quotation->referenceSalesOrder)
+                        <span class="inline-flex rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
+                            Ref: {{ $quotation->referenceSalesOrder->sales_order_no }}
+                        </span>
+                    @else
+                        <span class="inline-flex rounded-full bg-slate-500 px-2.5 py-1 text-xs font-semibold text-white">
+                            No Reference
+                        </span>
+                    @endif
                 </div>
                 <dl class="erp-panel-body grid gap-4 sm:grid-cols-2">
                     <div>
