@@ -110,20 +110,44 @@
                     </div>
                 </div>
 
-                <div class="max-h-[38rem] space-y-2 overflow-y-auto pr-1">
+                <div class="max-h-[38rem] overflow-y-auto pr-1">
                     @foreach ($orderedTabKeys as $tabName)
                         @php($groupSet = $tabGroups->get($tabName))
-                        <div x-show="permTab === '{{ $tabName }}'" x-cloak class="space-y-2">
+                        <div x-show="permTab === '{{ $tabName }}'" x-cloak class="grid gap-3 xl:grid-cols-2">
                             @foreach ($groupSet as $group => $groupPermissions)
-                                <div class="rounded-md border border-slate-200 bg-white px-3 py-2.5">
-                                    <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                                        {{ str_starts_with($group, 'Sales /') ? str($group)->after('Sales /')->replace('Order', 'Sales Order')->replace('Invoice', 'Sales Invoice')->replace('Collection', 'Sales Collection') : $group }}
-                                    </p>
-                                    <div class="mt-2 grid gap-x-3 gap-y-2 sm:grid-cols-2 xl:grid-cols-4">
+                                <div
+                                    class="rounded-lg border border-slate-200 bg-white shadow-sm"
+                                    x-data="{
+                                        allChecked: false,
+                                        sync() {
+                                            const boxes = Array.from(this.$refs.permissions.querySelectorAll('input[type=checkbox]'));
+                                            this.allChecked = boxes.length > 0 && boxes.every((box) => box.checked);
+                                        },
+                                        toggleAll() {
+                                            Array.from(this.$refs.permissions.querySelectorAll('input[type=checkbox]')).forEach((box) => box.checked = this.allChecked);
+                                        }
+                                    }"
+                                    x-init="sync()"
+                                >
+                                    <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2">
+                                        <p class="text-xs font-semibold uppercase text-slate-600">
+                                            {{ str_starts_with($group, 'Sales /') ? str($group)->after('Sales /')->replace('Order', 'Sales Order')->replace('Invoice', 'Sales Invoice')->replace('Collection', 'Sales Collection') : $group }}
+                                        </p>
+                                        <label class="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
+                                            <input
+                                                type="checkbox"
+                                                x-model="allChecked"
+                                                @change="toggleAll()"
+                                                class="size-3.5 rounded border-slate-300 text-cyan-600 erp-focus-ring"
+                                            >
+                                            <span>Check all</span>
+                                        </label>
+                                    </div>
+                                    <div x-ref="permissions" @change="sync()" class="grid gap-x-8 gap-y-4 px-4 py-4 sm:grid-cols-2">
                                         @foreach ($groupPermissions as $permission)
-                                            <label class="flex items-center gap-2 px-1 py-1 text-xs text-slate-700">
-                                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" @checked(in_array($permission->name, $selectedPermissions, true)) class="size-3.5 rounded border-slate-300 text-cyan-600 erp-focus-ring">
-                                                <span class="leading-4">{{ str($permission->name)->after('.')->headline() }}</span>
+                                            <label class="flex min-h-8 items-center gap-3 text-sm leading-5 text-slate-700">
+                                                <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" @checked(in_array($permission->name, $selectedPermissions, true)) class="size-4 shrink-0 rounded border-slate-300 text-cyan-600 erp-focus-ring">
+                                                <span>{{ str($permission->name)->after('.')->headline() }}</span>
                                             </label>
                                         @endforeach
                                     </div>
