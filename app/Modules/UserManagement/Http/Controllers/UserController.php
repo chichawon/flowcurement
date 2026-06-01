@@ -120,6 +120,49 @@ class UserController extends Controller
      */
     private function groupPermissions(Collection $permissions): Collection
     {
-        return $permissions->groupBy(fn ($permission) => str($permission->name)->before('.')->headline()->value());
+        $labelMap = [
+            'business-partners' => 'Business Partners',
+            'items' => 'Items',
+            'quotations' => 'Quotations',
+            'sales-orders' => 'Sales / Order',
+            'delivery-receipts' => 'Sales / D.R',
+            'sales-invoices' => 'Sales / Invoice',
+            'sales-collections' => 'Sales / Collection',
+        ];
+
+        $orderedLabels = [
+            'Sales',
+            'Sales / Order',
+            'Sales / D.R',
+            'Sales / Invoice',
+            'Sales / Collection',
+            'Business Partners',
+            'Items',
+            'Quotations',
+        ];
+
+        $grouped = $permissions
+            ->reject(fn ($permission) => str($permission->name)->startsWith('dashboard.'))
+            ->groupBy(function ($permission) use ($labelMap): string {
+                $module = (string) str($permission->name)->before('.');
+
+                return $labelMap[$module] ?? str($module)->headline()->value();
+            });
+
+        $ordered = collect();
+
+        foreach ($orderedLabels as $label) {
+            if ($grouped->has($label)) {
+                $ordered->put($label, $grouped->get($label));
+            }
+        }
+
+        foreach ($grouped as $label => $groupPermissions) {
+            if (! $ordered->has($label)) {
+                $ordered->put($label, $groupPermissions);
+            }
+        }
+
+        return $ordered;
     }
 }

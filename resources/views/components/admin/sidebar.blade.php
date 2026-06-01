@@ -1,4 +1,12 @@
 @php
+    $canAnySalesMenu = auth()->user()?->canAny([
+        'sales.view',
+        'sales-orders.view',
+        'delivery-receipts.view',
+        'sales-invoices.view',
+        'sales-collections.view',
+    ]) ?? false;
+
     $navigation = [
         ['label' => 'Dashboard', 'permission' => 'dashboard.view', 'url' => route('dashboard'), 'active' => request()->routeIs('dashboard'), 'icon' => 'M3 13.5V6a1.5 1.5 0 0 1 1.5-1.5h2.25A1.5 1.5 0 0 1 8.25 6v7.5A1.5 1.5 0 0 1 6.75 15H4.5A1.5 1.5 0 0 1 3 13.5Zm7.5 0V10.5A1.5 1.5 0 0 1 12 9h2.25a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1-1.5-1.5Zm7.5 0V4.5A1.5 1.5 0 0 1 19.5 3h2.25A1.5 1.5 0 0 1 23.25 4.5v9A1.5 1.5 0 0 1 21.75 15H19.5A1.5 1.5 0 0 1 18 13.5Z'],
         [
@@ -27,14 +35,15 @@
 
         [
             'label' => 'Sales',
-            'permission' => 'sales-orders.view',
+            'permission' => 'dashboard.view',
+            'visible' => $canAnySalesMenu,
             'active' => request()->routeIs('sales.orders.*') || request()->routeIs('sales.delivery-receipts.*'),
             'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.63-1.163m0 0-5.25-.875m5.25.875-.875 5.25',
             'children' => [
-                ['label' => 'Order', 'url' => route('sales.orders.index'), 'active' => request()->routeIs('sales.orders.*')],
-                ['label' => 'Delivery Receipt', 'url' => route('sales.delivery-receipts.index'), 'active' => request()->routeIs('sales.delivery-receipts.*')],
-                ['label' => 'Invoice', 'url' => '#', 'active' => false],
-                ['label' => 'Collection', 'url' => '#', 'active' => false],
+                ['label' => 'Order', 'permission' => 'sales-orders.view', 'url' => route('sales.orders.index'), 'active' => request()->routeIs('sales.orders.*')],
+                ['label' => 'Delivery Receipt', 'permission' => 'delivery-receipts.view', 'url' => route('sales.delivery-receipts.index'), 'active' => request()->routeIs('sales.delivery-receipts.*')],
+                ['label' => 'Invoice', 'permission' => 'sales-invoices.view', 'url' => '#', 'active' => false],
+                ['label' => 'Collection', 'permission' => 'sales-collections.view', 'url' => '#', 'active' => false],
             ],
         ],
      
@@ -68,6 +77,9 @@
 
     <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         @foreach ($navigation as $item)
+            @if (array_key_exists('visible', $item) && ! $item['visible'])
+                @continue
+            @endif
             @can($item['permission'])
                 @if (isset($item['children']))
                     <div x-data="{ open: {{ ($item['active'] ?? false) ? 'true' : 'false' }} }" class="space-y-1">
@@ -90,13 +102,15 @@
 
                         <div x-show="open && ! sidebarCollapsed" x-transition class="ml-8 space-y-1 border-l border-white/10 pl-3">
                             @foreach ($item['children'] as $child)
-                                <a href="{{ $child['url'] }}" @class([
-                                    'block rounded-md px-3 py-2 text-sm font-medium transition',
-                                    'bg-cyan-400/10 text-cyan-200' => $child['active'] ?? false,
-                                    'text-slate-400 hover:bg-white/10 hover:text-white' => ! ($child['active'] ?? false),
-                                ]) aria-current="{{ ($child['active'] ?? false) ? 'page' : 'false' }}">
-                                    {{ $child['label'] }}
-                                </a>
+                                @can($child['permission'] ?? $item['permission'])
+                                    <a href="{{ $child['url'] }}" @class([
+                                        'block rounded-md px-3 py-2 text-sm font-medium transition',
+                                        'bg-cyan-400/10 text-cyan-200' => $child['active'] ?? false,
+                                        'text-slate-400 hover:bg-white/10 hover:text-white' => ! ($child['active'] ?? false),
+                                    ]) aria-current="{{ ($child['active'] ?? false) ? 'page' : 'false' }}">
+                                        {{ $child['label'] }}
+                                    </a>
+                                @endcan
                             @endforeach
                         </div>
                     </div>

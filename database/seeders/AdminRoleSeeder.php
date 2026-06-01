@@ -92,7 +92,6 @@ class AdminRoleSeeder extends Seeder
         $inventoryRole?->syncPermissions(Permission::whereIn('name', [
             'dashboard.view',
             'inventory.view',
-            'items.view',
             'items.update',
         ])->get());
 

@@ -50,7 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/{businessPartner}/edit', [BusinessPartnerPageController::class, 'suppliersEdit'])->middleware('permission:business-partners.update')->name('edit');
         });
 
-    Route::get('/items', [ItemPageController::class, 'redirectIndex'])->name('items.index');
+    Route::get('/items', [ItemPageController::class, 'redirectIndex'])
+        ->middleware('permission:items.view')
+        ->name('items.index');
 
     Route::prefix('items/local')
         ->name('local-items.')
@@ -95,13 +97,13 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
     Route::prefix('sales/delivery-receipts')
         ->name('sales.delivery-receipts.')
-        ->middleware(['permission:sales-orders.view'])
+        ->middleware(['permission:delivery-receipts.view'])
         ->group(function (): void {
             Route::get('/', [DeliveryReceiptPageController::class, 'index'])->name('index');
-            Route::get('/create', [DeliveryReceiptPageController::class, 'create'])->middleware('permission:sales-orders.create')->name('create');
+            Route::get('/create', [DeliveryReceiptPageController::class, 'create'])->middleware('permission:delivery-receipts.create')->name('create');
             Route::get('/{deliveryReceipt}', [DeliveryReceiptPageController::class, 'show'])->name('show');
-            Route::get('/{deliveryReceipt}/upload-details', [DeliveryReceiptPageController::class, 'uploadDetails'])->middleware('permission:sales-orders.update')->name('upload-details');
-            Route::get('/{deliveryReceipt}/edit', [DeliveryReceiptPageController::class, 'edit'])->middleware('permission:sales-orders.update')->name('edit');
+            Route::get('/{deliveryReceipt}/upload-details', [DeliveryReceiptPageController::class, 'uploadDetails'])->middleware('permission:delivery-receipts.update')->name('upload-details');
+            Route::get('/{deliveryReceipt}/edit', [DeliveryReceiptPageController::class, 'edit'])->middleware('permission:delivery-receipts.update')->name('edit');
         });
 });
 

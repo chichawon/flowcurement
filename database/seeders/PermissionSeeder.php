@@ -82,5 +82,23 @@ class PermissionSeeder extends Seeder
                 'guard_name' => 'web',
             ]);
         }
+
+        foreach ([
+            'sales-invoices.view',
+            'sales-invoices.create',
+            'sales-invoices.update',
+            'sales-invoices.delete',
+            'sales-invoices.print',
+            'sales-collections.view',
+            'sales-collections.create',
+            'sales-collections.update',
+            'sales-collections.delete',
+            'sales-collections.print',
+        ] as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
     }
 }
