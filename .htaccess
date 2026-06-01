@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Send the application root to Laravel's root front controller.
+    RewriteRule ^$ index.php [END]
+
+    # Serve real files and directories from Laravel's public directory.
+    RewriteCond %{DOCUMENT_ROOT}/flowcurement/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/flowcurement/public/$1 -d
+    RewriteRule ^(.+)$ public/$1 [END]
+
+    # Send all application routes to Laravel's root front controller for subdirectory support.
+    RewriteRule ^(.*)$ index.php [END]
+</IfModule>

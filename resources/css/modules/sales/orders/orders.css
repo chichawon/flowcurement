@@ -1,0 +1,5 @@
+@layer components {
+    .sales-order-table-input {
+        @apply border border-slate-400 px-2 text-sm;
+    }
+}
