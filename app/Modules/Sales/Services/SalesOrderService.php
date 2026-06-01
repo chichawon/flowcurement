@@ -103,7 +103,7 @@ class SalesOrderService
         return DB::transaction(function () use ($salesOrder, $data): SalesOrder {
             $old = $salesOrder->load('items')->toArray();
 
-            if ($this->hasIssuedDeliveryReceipt($salesOrder)) {
+            if ($this->isAttachmentOnlyMode($salesOrder)) {
                 $allowedHeader = [
                     'po_attachment' => $data['po_attachment'] ?? $salesOrder->po_attachment,
                     'updated_by' => $data['updated_by'] ?? auth()->id(),
@@ -132,6 +132,15 @@ class SalesOrderService
             ->whereHas('salesOrderItem', fn (Builder $query) => $query->where('sales_order_id', $salesOrder->id))
             ->whereHas('deliveryReceipt', fn (Builder $query) => $query->where('status', '!=', 'cancelled'))
             ->exists();
+    }
+
+    public function isAttachmentOnlyMode(SalesOrder $salesOrder): bool
+    {
+        if (in_array((string) $salesOrder->status, ['partial', 'served'], true)) {
+            return true;
+        }
+
+        return $this->hasIssuedDeliveryReceipt($salesOrder);
     }
 
     public function delete(SalesOrder $salesOrder): void

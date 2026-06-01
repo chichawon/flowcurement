@@ -54,21 +54,25 @@
                 <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
                     <colgroup>
                         <col class="w-20">
-                        <col class="w-[22%]">
-                        <col class="w-[24%]">
-                        <col class="w-[14%]">
-                        <col class="w-[14%]">
-                        <col class="w-[14%]">
+                        <col class="w-[15%]">
+                        <col class="w-[11%]">
                         <col class="w-[12%]">
+                        <col class="w-[15%]">
+                        <col class="w-[10%]">
+                        <col class="w-[9%]">
+                        <col class="w-[12%]">
+                        <col class="w-[9%]">
                     </colgroup>
                     <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                         <tr>
                             <th class="px-4 py-3 text-center">Action</th>
-                            <th class="px-4 py-3 text-left">Quotation</th>
-                            <th class="px-3 py-3 text-left">Client</th>
-                            <th class="px-3 py-3 text-center">Dates</th>
-                            <th class="px-3 py-3 text-right">Total</th>
-                            <th class="px-3 py-3 text-center">Prepared By</th>
+                            <th class="px-4 py-3 text-left">Quotation No</th>
+                            <th class="px-3 py-3 text-center">Quotation Date</th>
+                            <th class="px-3 py-3 text-left">Items</th>
+                            <th class="px-3 py-3 text-left">Company Name</th>
+                            <th class="px-3 py-3 text-left">Contact No</th>
+                            <th class="px-3 py-3 text-left">Agent</th>
+                            <th class="px-3 py-3 text-right">Total Amount</th>
                             <th class="px-3 py-3 text-center">Reference</th>
                         </tr>
                     </thead>
@@ -102,39 +106,100 @@
                                     </x-dropdown>
                                 </td>
                                 <td class="px-4 py-3 align-middle">
-                                    <p class="truncate font-semibold text-slate-950">{{ $quotation->quotation_no }}</p>
-                                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ str($quotation->currency)->upper() }} | Tax {{ number_format((float) $quotation->tax_rate, 0) }}%</p>
-                                </td>
-                                <td class="px-3 py-3 align-middle">
-                                    <p class="truncate font-medium text-slate-800">{{ $quotation->businessPartner?->company_name ?? 'No client' }}</p>
-                                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ $quotation->contact_person }} {{ $quotation->contact_no ? '| '.$quotation->contact_no : '' }}</p>
+                                    <p class="whitespace-nowrap font-semibold text-slate-950">{{ $quotation->quotation_no }}</p>
+                                    <p class="mt-0.5 truncate text-xs text-slate-500">{{ str($quotation->currency)->upper() }}</p>
                                 </td>
                                 <td class="px-3 py-3 text-center align-middle">
                                     <p class="font-medium text-slate-800">{{ $quotation->quotation_date?->format('M d, Y') }}</p>
-                                    <p class="mt-0.5 text-xs text-slate-500">Valid {{ $quotation->validity_date?->format('M d, Y') }}</p>
+                                </td>
+                                <td class="px-3 py-3 align-middle">
+                                    <button type="button" wire:click="toggleItemsRow({{ $quotation->id }})" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                        <span>{{ in_array($quotation->id, $expandedQuotationRows, true) ? 'Hide' : 'View' }}</span>
+                                        <span class="ml-1.5">({{ $quotation->items->count() }})</span>
+                                    </button>
+                                </td>
+                                <td class="px-3 py-3 align-middle">
+                                    <p class="truncate font-medium text-slate-800">{{ $quotation->businessPartner?->company_name ?? 'No client' }}</p>
+                                </td>
+                                <td class="px-3 py-3 align-middle text-slate-700">
+                                    {{ $quotation->contact_no ?: ($quotation->businessPartner?->contact_no ?? '-') }}
+                                </td>
+                                <td class="px-3 py-3 align-middle text-slate-700">
+                                    {{ $quotation->agent_name ?: '-' }}
                                 </td>
                                 <td class="px-3 py-3 text-right align-middle">
                                     <p class="font-semibold text-slate-950">{{ number_format((float) $quotation->total_amount, 2) }}</p>
-                                    <p class="mt-0.5 text-xs text-slate-500">Base {{ number_format((float) $quotation->subtotal, 2) }}</p>
-                                </td>
-                                <td class="px-3 py-3 text-center align-middle">
-                                    <p class="truncate text-sm text-slate-700">{{ $quotation->preparedBy?->name ?? 'System' }}</p>
                                 </td>
                                 <td class="px-3 py-3 text-center align-middle">
                                     @if ($quotation->referenceSalesOrder)
-                                        <span class="inline-flex rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
+                                        <span class="inline-flex min-h-7 items-center rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
                                             {{ $quotation->referenceSalesOrder->sales_order_no }}
                                         </span>
                                     @else
-                                        <span class="inline-flex rounded-full bg-slate-500 px-2.5 py-1 text-xs font-semibold text-white">
+                                        <span class="inline-flex min-h-7 items-center rounded-md bg-slate-500 px-2.5 py-1 text-xs font-semibold text-white">
                                             No Reference
                                         </span>
                                     @endif
                                 </td>
                             </tr>
+                            @if (in_array($quotation->id, $expandedQuotationRows, true))
+                                <tr>
+                                    <td colspan="9" class="bg-slate-50/60 px-3 py-3">
+                                        <div class="overflow-x-auto rounded-md border border-slate-200 bg-white">
+                                            <table class="min-w-[980px] w-full table-fixed divide-y divide-slate-200 text-xs">
+                                                <colgroup>
+                                                    <col class="w-[16%]">
+                                                    <col class="w-[18%]">
+                                                    <col class="w-[10%]">
+                                                    <col class="w-[8%]">
+                                                    <col class="w-[8%]">
+                                                    <col class="w-[10%]">
+                                                    <col class="w-[10%]">
+                                                    <col class="w-[10%]">
+                                                    <col class="w-[10%]">
+                                                </colgroup>
+                                                <thead class="bg-slate-100 font-semibold uppercase text-slate-600">
+                                                    <tr>
+                                                        <th class="px-2 py-2 text-left">Item Name</th>
+                                                        <th class="px-2 py-2 text-left">Description</th>
+                                                        <th class="px-2 py-2 text-left">Unit</th>
+                                                        <th class="px-2 py-2 text-right">Quantity</th>
+                                                        <th class="px-2 py-2 text-right">Tax Rate</th>
+                                                        <th class="px-2 py-2 text-right">Item Price</th>
+                                                        <th class="px-2 py-2 text-right">Tax Amount</th>
+                                                        <th class="px-2 py-2 text-right">Subtotal</th>
+                                                        <th class="px-2 py-2 text-right">Total Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-slate-200">
+                                                    @foreach ($quotation->items as $itemRow)
+                                                        @php
+                                                            $lineSubtotal = (float) $itemRow->total;
+                                                            $lineTaxRate = (float) $quotation->tax_rate;
+                                                            $lineTaxAmount = round($lineSubtotal * ($lineTaxRate / 100), 2);
+                                                            $lineTotalAmount = round($lineSubtotal + $lineTaxAmount, 2);
+                                                        @endphp
+                                                        <tr class="text-slate-700">
+                                                            <td class="px-2 py-2 font-medium text-slate-900">{{ $itemRow->item?->item_name ?? 'N/A' }}</td>
+                                                            <td class="px-2 py-2">{{ $itemRow->description ?: '-' }}</td>
+                                                            <td class="px-2 py-2">{{ str($itemRow->unitMeasure?->name)->headline() }}</td>
+                                                            <td class="px-2 py-2 text-right">{{ number_format((float) $itemRow->quantity, 0) }}</td>
+                                                            <td class="px-2 py-2 text-right">{{ number_format($lineTaxRate, 0) }}%</td>
+                                                            <td class="px-2 py-2 text-right">{{ number_format((float) $itemRow->item_price, 2) }}</td>
+                                                            <td class="px-2 py-2 text-right">{{ number_format($lineTaxAmount, 2) }}</td>
+                                                            <td class="px-2 py-2 text-right">{{ number_format($lineSubtotal, 2) }}</td>
+                                                            <td class="px-2 py-2 text-right font-semibold text-slate-900">{{ number_format($lineTotalAmount, 2) }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">No quotations found.</td>
+                                <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">No quotations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

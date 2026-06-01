@@ -94,7 +94,7 @@ trait ManagesSalesOrderForm
     {
         $salesOrder->load(['items']);
         $this->salesOrderRecord = $salesOrder;
-        $this->attachmentOnlyMode = app(SalesOrderService::class)->hasIssuedDeliveryReceipt($salesOrder);
+        $this->attachmentOnlyMode = app(SalesOrderService::class)->isAttachmentOnlyMode($salesOrder);
         $this->sales_order_no = $salesOrder->sales_order_no;
         $this->order_date = $salesOrder->order_date?->toDateString() ?? now()->toDateString();
         $this->no_of_days = (int) $salesOrder->no_of_days;

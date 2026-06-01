@@ -22,6 +22,7 @@ class QuotationsIndex extends Component
     public string $date_to = '';
 
     public int $perPage = 10;
+    public array $expandedQuotationRows = [];
 
     public bool $showDeleteConfirmation = false;
 
@@ -39,6 +40,20 @@ class QuotationsIndex extends Component
     public function updatingDateFrom(): void { $this->resetPage(); }
     public function updatingDateTo(): void { $this->resetPage(); }
     public function updatingPerPage(): void { $this->resetPage(); }
+
+    public function toggleItemsRow(int $quotationId): void
+    {
+        if (in_array($quotationId, $this->expandedQuotationRows, true)) {
+            $this->expandedQuotationRows = array_values(array_filter(
+                $this->expandedQuotationRows,
+                fn (int $id): bool => $id !== $quotationId
+            ));
+
+            return;
+        }
+
+        $this->expandedQuotationRows[] = $quotationId;
+    }
 
     public function promptDeleteQuotation(int $quotationId): void
     {

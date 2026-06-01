@@ -1,7 +1,12 @@
 <form wire:submit.prevent="save" class="space-y-5">
     <section class="erp-panel">
-        <div class="erp-panel-header">
+        <div class="erp-panel-header flex items-center justify-between gap-3">
             <h3 class="text-sm font-semibold text-slate-950">{{ $title }}</h3>
+            @if ($salesOrderRecord)
+                <span class="inline-flex rounded-md px-2.5 py-1 text-xs font-semibold uppercase {{ $status === 'served' ? 'bg-emerald-600 text-white' : ($status === 'partial' ? 'bg-cyan-700 text-white' : ($status === 'pending' ? 'bg-amber-600 text-white' : 'bg-slate-500 text-white')) }}">
+                    {{ str($status)->headline() }}
+                </span>
+            @endif
         </div>
         <div class="erp-panel-body space-y-4">
             <div class="grid gap-3 lg:grid-cols-4">
@@ -59,13 +64,6 @@
                     <input type="text" wire:model="contact_no" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm text-slate-700 shadow-sm">
                 </label>
             </div>
-
-            @if ($salesOrderRecord)
-            <label class="block lg:max-w-xs">
-                <span class="text-sm font-medium text-slate-700">Status</span>
-                <input type="text" value="{{ str($status)->headline() }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-900 shadow-sm">
-            </label>
-            @endif
 
             <label class="block">
                 <span class="text-sm font-medium text-slate-700">Remarks</span>

@@ -22,7 +22,14 @@ class QuotationService
     public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         return Quotation::query()
-            ->with(['businessPartner:id,company_name,type', 'preparedBy:id,name', 'referenceSalesOrder:id,sales_order_no'])
+            ->with([
+                'businessPartner:id,company_name,type,contact_no',
+                'preparedBy:id,name',
+                'referenceSalesOrder:id,sales_order_no',
+                'items:id,quotation_id,item_id,description,unit_measure_id,item_price,quantity,total',
+                'items.item:id,item_name',
+                'items.unitMeasure:id,name',
+            ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('quotation_no', 'like', "%{$search}%")
