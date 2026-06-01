@@ -12,7 +12,7 @@
 @endphp
 
 <div class="space-y-4">
-    <div class="grid gap-4 xl:grid-cols-2">
+    <div class="grid gap-4 lg:grid-cols-2">
         <section class="erp-panel h-full">
             <div class="erp-panel-header">
                 <h3 class="text-sm font-semibold text-slate-950">Account Information</h3>
@@ -90,19 +90,19 @@
                 ->values();
             $initialTab = $orderedTabKeys->first();
         @endphp
-        <section class="erp-panel" x-data="{ permTab: '{{ $initialTab }}' }">
+        <section class="erp-panel w-full" x-data="{ permTab: '{{ $initialTab }}' }">
             <div class="erp-panel-header">
                 <h3 class="text-sm font-semibold text-slate-950">Direct Permissions</h3>
             </div>
             <div class="erp-panel-body">
-                <div class="mb-3 overflow-x-auto">
-                    <div class="inline-flex min-w-full items-end gap-1 border-b border-slate-300">
+                <div class="mb-4 overflow-x-auto">
+                    <div class="inline-flex min-w-full items-end gap-1 border-b border-slate-300 px-1 pt-1">
                         @foreach ($orderedTabKeys as $tabName)
                             <button
                                 type="button"
                                 @click="permTab = '{{ $tabName }}'"
-                                :class="permTab === '{{ $tabName }}' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'"
-                                class="relative -mb-px inline-flex items-center rounded-t-md border px-3 py-1.5 text-xs font-semibold whitespace-nowrap"
+                                :class="permTab === '{{ $tabName }}' ? 'z-10 bg-cyan-600 text-white border-cyan-600 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 hover:text-slate-900'"
+                                class="relative -mb-px inline-flex h-9 items-center rounded-t-lg border px-4 text-xs font-semibold whitespace-nowrap transition"
                             >
                                 {{ $tabName }}
                             </button>
@@ -115,13 +115,13 @@
                         @php($groupSet = $tabGroups->get($tabName))
                         <div x-show="permTab === '{{ $tabName }}'" x-cloak class="space-y-2">
                             @foreach ($groupSet as $group => $groupPermissions)
-                                <div class="rounded-md border border-slate-200 bg-white p-2.5">
+                                <div class="rounded-md border border-slate-200 bg-white px-3 py-2.5">
                                     <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                                         {{ str_starts_with($group, 'Sales /') ? str($group)->after('Sales /')->replace('Order', 'Sales Order')->replace('Invoice', 'Sales Invoice')->replace('Collection', 'Sales Collection') : $group }}
                                     </p>
-                                    <div class="mt-2 grid gap-x-3 gap-y-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                                    <div class="mt-2 grid gap-x-3 gap-y-2 sm:grid-cols-2 xl:grid-cols-4">
                                         @foreach ($groupPermissions as $permission)
-                                            <label class="flex items-center gap-2 text-xs text-slate-700">
+                                            <label class="flex items-center gap-2 px-1 py-1 text-xs text-slate-700">
                                                 <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" @checked(in_array($permission->name, $selectedPermissions, true)) class="size-3.5 rounded border-slate-300 text-cyan-600 erp-focus-ring">
                                                 <span class="leading-4">{{ str($permission->name)->after('.')->headline() }}</span>
                                             </label>
