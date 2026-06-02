@@ -7,6 +7,7 @@ use App\Modules\BusinessPartners\Helpers\BusinessPartnerPermissions;
 use App\Modules\Items\Helpers\ItemPermissions;
 use App\Modules\Quotations\Helpers\QuotationPermissions;
 use App\Modules\Sales\Helpers\DeliveryReceiptPermissions;
+use App\Modules\Sales\Helpers\SalesInvoicePermissions;
 use App\Modules\Sales\Helpers\SalesOrderPermissions;
 use App\Modules\UserManagement\Models\Permission;
 use Illuminate\Database\Seeder;
@@ -83,12 +84,14 @@ class PermissionSeeder extends Seeder
             ]);
         }
 
+        foreach (SalesInvoicePermissions::all() as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
         foreach ([
-            'sales-invoices.view',
-            'sales-invoices.create',
-            'sales-invoices.update',
-            'sales-invoices.delete',
-            'sales-invoices.print',
             'sales-collections.view',
             'sales-collections.create',
             'sales-collections.update',

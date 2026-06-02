@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Sales\Models\SalesInvoice;
+use App\Modules\Sales\Services\SalesInvoiceService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -34,6 +37,24 @@ class SalesInvoicePageController extends Controller
         return view('modules.sales.invoices.show', ['salesInvoice' => $salesInvoice]);
     }
 
+    public function print(int $salesInvoice): Response|RedirectResponse
+    {
+        $salesInvoice = SalesInvoice::query()->find($salesInvoice);
+
+        if (! $salesInvoice) {
+            return redirect()->route('sales.invoices.index')->with('toast', 'Sales invoice no longer exists.');
+        }
+
+        $this->loadSalesInvoice($salesInvoice);
+        Gate::authorize('print', $salesInvoice);
+
+        return Pdf::loadView('modules.sales.invoices.pdf', [
+            'salesInvoice' => $salesInvoice,
+        ])
+            ->setPaper('a4')
+            ->stream($salesInvoice->sales_invoice_no.'.pdf');
+    }
+
     public function edit(int $salesInvoice): View|RedirectResponse
     {
         $exists = SalesInvoice::query()->whereKey($salesInvoice)->exists();
@@ -42,5 +63,28 @@ class SalesInvoicePageController extends Controller
         }
 
         return view('modules.sales.invoices.edit', ['salesInvoice' => $salesInvoice]);
+    }
+
+    public function issue(SalesInvoice $salesInvoice, SalesInvoiceService $service): RedirectResponse
+    {
+        Gate::authorize('issue', $salesInvoice);
+
+        $service->issue($salesInvoice);
+
+        return redirect()
+            ->route('sales.invoices.show', $salesInvoice)
+            ->with('toast', 'Sales invoice issued successfully.');
+    }
+
+    private function loadSalesInvoice(SalesInvoice $salesInvoice): void
+    {
+        $salesInvoice->load([
+            'businessPartner:id,company_name,company_code',
+            'salesOrder:id,sales_order_no',
+            'deliveryReceipt:id,delivery_receipt_no',
+            'items.item:id,item_name,item_code',
+            'items.unitMeasure:id,name',
+            'creator:id,name',
+        ]);
     }
 }

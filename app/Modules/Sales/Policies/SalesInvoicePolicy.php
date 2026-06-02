@@ -21,5 +21,10 @@ class SalesInvoicePolicy
         return $actor->can(SalesInvoicePermissions::DELETE)
             && ! in_array($salesInvoice->status, ['paid', 'void'], true);
     }
+    public function issue(User $actor, SalesInvoice $salesInvoice): bool
+    {
+        return $actor->can(SalesInvoicePermissions::ISSUE)
+            && $salesInvoice->status === 'pending';
+    }
     public function print(User $actor, SalesInvoice $salesInvoice): bool { return $actor->can(SalesInvoicePermissions::PRINT); }
 }

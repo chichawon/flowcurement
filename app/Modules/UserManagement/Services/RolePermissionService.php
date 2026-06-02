@@ -42,6 +42,7 @@ class RolePermissionService
         'sales-invoices.update',
         'sales-invoices.delete',
         'sales-invoices.print',
+        'sales-invoices.issue',
         'sales-collections.view',
         'sales-collections.create',
         'sales-collections.update',

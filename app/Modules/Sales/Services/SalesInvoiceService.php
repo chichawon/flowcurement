@@ -148,6 +148,7 @@ class SalesInvoiceService
 
         return DB::transaction(function () use ($payload): SalesInvoice {
             $this->ensureDeliveryReceiptIsCompleted((int) ($payload['delivery_receipt_id'] ?? 0));
+            $this->applySourceTaxRate($payload);
             $payload['sales_invoice_no'] = $this->nextSalesInvoiceNo();
             $invoice = SalesInvoice::query()->create($this->headerPayload($payload));
             $this->syncItems($invoice, $payload['items'] ?? []);
@@ -163,6 +164,7 @@ class SalesInvoiceService
 
         return DB::transaction(function () use ($invoice, $payload): SalesInvoice {
             $this->ensureDeliveryReceiptIsCompleted((int) ($payload['delivery_receipt_id'] ?? 0));
+            $this->applySourceTaxRate($payload);
             $old = $invoice->load('items')->toArray();
             $invoice->update($this->headerPayload($payload, false));
             $invoice->items()->delete();
@@ -184,6 +186,22 @@ class SalesInvoiceService
                 'updated_by' => auth()->id(),
             ]);
             app(AuditTrailService::class)->record(self::MODULE, 'voided', $invoice, $old, $invoice->toArray(), 'Sales invoice voided: '.$invoice->sales_invoice_no);
+
+            return $invoice->refresh();
+        });
+    }
+
+    public function issue(SalesInvoice $invoice): SalesInvoice
+    {
+        Gate::authorize('issue', $invoice);
+
+        return DB::transaction(function () use ($invoice): SalesInvoice {
+            $old = $invoice->toArray();
+            $invoice->update([
+                'status' => 'issued',
+                'updated_by' => auth()->id(),
+            ]);
+            app(AuditTrailService::class)->record(self::MODULE, 'issued', $invoice, $old, $invoice->toArray(), 'Sales invoice issued: '.$invoice->sales_invoice_no);
 
             return $invoice->refresh();
         });
@@ -255,7 +273,7 @@ class SalesInvoiceService
                 continue;
             }
 
-            $price = (float) ($row['price'] ?? $drItem->salesOrderItem?->price ?? 0);
+            $price = (float) ($drItem->salesOrderItem?->price ?? 0);
             $subtotal = round($quantity * $price, 2);
             $taxRate = (float) ($invoice->tax_rate ?? 0);
             $taxAmount = round($subtotal * ($taxRate / 100), 2);
@@ -293,6 +311,17 @@ class SalesInvoiceService
 
         if ($status !== 'completed') {
             throw new \RuntimeException('Only completed delivery receipts can be invoiced.');
+        }
+    }
+
+    private function applySourceTaxRate(array &$payload): void
+    {
+        $source = DeliveryReceipt::query()
+            ->with('salesOrder:id,tax_rate')
+            ->find((int) ($payload['delivery_receipt_id'] ?? 0));
+
+        if ($source?->salesOrder) {
+            $payload['tax_rate'] = (float) $source->salesOrder->tax_rate;
         }
     }
 

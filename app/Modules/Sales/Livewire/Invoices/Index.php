@@ -22,6 +22,9 @@ class Index extends Component
     public bool $showVoidConfirmation = false;
     public ?int $pendingVoidInvoiceId = null;
     public string $pendingVoidInvoiceNo = '';
+    public bool $showIssueConfirmation = false;
+    public ?int $pendingIssueInvoiceId = null;
+    public string $pendingIssueInvoiceNo = '';
 
     public function mount(): void
     {
@@ -49,6 +52,20 @@ class Index extends Component
         $this->showVoidConfirmation = true;
     }
 
+    public function promptIssueInvoice(int $invoiceId): void
+    {
+        $invoice = SalesInvoice::query()->find($invoiceId);
+        if (! $invoice) {
+            session()->flash('toast', 'Sales invoice no longer exists.');
+            return;
+        }
+
+        $this->authorize('issue', $invoice);
+        $this->pendingIssueInvoiceId = $invoice->id;
+        $this->pendingIssueInvoiceNo = $invoice->sales_invoice_no;
+        $this->showIssueConfirmation = true;
+    }
+
     public function voidConfirmedInvoice(): void
     {
         if (! $this->pendingVoidInvoiceId) {
@@ -65,6 +82,7 @@ class Index extends Component
 
         app(SalesInvoiceService::class)->void($invoice);
         session()->flash('toast', 'Sales invoice voided successfully.');
+        $this->dispatch('toast', message: 'Sales invoice voided successfully.', type: 'success');
         $this->resetVoidConfirmationState();
     }
 
@@ -73,11 +91,43 @@ class Index extends Component
         $this->resetVoidConfirmationState();
     }
 
+    public function issueConfirmedInvoice(): void
+    {
+        if (! $this->pendingIssueInvoiceId) {
+            $this->resetIssueConfirmationState();
+            return;
+        }
+
+        $invoice = SalesInvoice::query()->find($this->pendingIssueInvoiceId);
+        if (! $invoice) {
+            session()->flash('toast', 'Sales invoice no longer exists.');
+            $this->resetIssueConfirmationState();
+            return;
+        }
+
+        app(SalesInvoiceService::class)->issue($invoice);
+        session()->flash('toast', 'Sales invoice issued successfully.');
+        $this->dispatch('toast', message: 'Sales invoice issued successfully.', type: 'success');
+        $this->resetIssueConfirmationState();
+    }
+
+    public function cancelIssueConfirmation(): void
+    {
+        $this->resetIssueConfirmationState();
+    }
+
     private function resetVoidConfirmationState(): void
     {
         $this->showVoidConfirmation = false;
         $this->pendingVoidInvoiceId = null;
         $this->pendingVoidInvoiceNo = '';
+    }
+
+    private function resetIssueConfirmationState(): void
+    {
+        $this->showIssueConfirmation = false;
+        $this->pendingIssueInvoiceId = null;
+        $this->pendingIssueInvoiceNo = '';
     }
 
     public function render()

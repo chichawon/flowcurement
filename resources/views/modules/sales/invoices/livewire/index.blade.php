@@ -95,6 +95,12 @@
                                             @can('update', $invoice)
                                                 <a href="{{ route('sales.invoices.edit', $invoice) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
                                             @endcan
+                                            @can('issue', $invoice)
+                                                <button type="button" wire:click="promptIssueInvoice({{ $invoice->id }})" class="block w-full px-4 py-2 text-start text-sm text-cyan-700 hover:bg-cyan-50">Issue</button>
+                                            @endcan
+                                            @can('print', $invoice)
+                                                <a href="{{ route('sales.invoices.print', $invoice) }}" target="_blank" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Print</a>
+                                            @endcan
                                             @can('delete', $invoice)
                                                 <button type="button" wire:click="promptVoidInvoice({{ $invoice->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Void</button>
                                             @endcan
@@ -160,6 +166,24 @@
             @endif
         </div>
     </section>
+
+    <div x-data="{ open: @entangle('showIssueConfirmation').live }" x-show="open" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0" role="dialog" aria-modal="true">
+        <div class="absolute inset-0 bg-slate-950/60" @click="$wire.cancelIssueConfirmation()"></div>
+        <div class="relative w-full max-w-sm rounded-xl bg-white shadow-2xl">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h3 class="text-base font-semibold text-slate-950">Issue sales invoice?</h3>
+                <p class="mt-1 text-sm text-slate-500">This will mark the invoice as official billing and lock item edits.</p>
+            </div>
+            <div class="px-5 py-4">
+                <p class="text-sm text-slate-600">Issue:</p>
+                <p class="mt-1 text-sm font-semibold text-slate-950">{{ $pendingIssueInvoiceNo }}</p>
+            </div>
+            <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
+                <button type="button" wire:click="cancelIssueConfirmation" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="button" wire:click="issueConfirmedInvoice" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
+            </div>
+        </div>
+    </div>
 
     <div x-data="{ open: @entangle('showVoidConfirmation').live }" x-show="open" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0" role="dialog" aria-modal="true">
         <div class="absolute inset-0 bg-slate-950/60" @click="$wire.cancelVoidConfirmation()"></div>

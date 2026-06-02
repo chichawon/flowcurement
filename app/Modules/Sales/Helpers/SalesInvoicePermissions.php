@@ -9,6 +9,7 @@ class SalesInvoicePermissions
     public const UPDATE = 'sales-invoices.update';
     public const DELETE = 'sales-invoices.delete';
     public const PRINT = 'sales-invoices.print';
+    public const ISSUE = 'sales-invoices.issue';
 
     public static function all(): array
     {
@@ -18,6 +19,7 @@ class SalesInvoicePermissions
             self::UPDATE,
             self::DELETE,
             self::PRINT,
+            self::ISSUE,
         ];
     }
 }

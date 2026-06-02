@@ -109,6 +109,15 @@
 
         <div class="flex items-center justify-end gap-2">
             <a href="{{ route('sales.invoices.index') }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back</a>
+            @can('print', $salesInvoice)
+                <a href="{{ route('sales.invoices.print', $salesInvoice) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
+            @endcan
+            @can('issue', $salesInvoice)
+                <form method="POST" action="{{ route('sales.invoices.issue', $salesInvoice) }}" onsubmit="return confirm('Issue this sales invoice? Once issued, it will be locked for billing.');">
+                    @csrf
+                    <button type="submit" class="rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
+                </form>
+            @endcan
             @can('update', $salesInvoice)
                 <a href="{{ route('sales.invoices.edit', $salesInvoice) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
             @endcan

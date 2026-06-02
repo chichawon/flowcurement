@@ -110,12 +110,10 @@
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['delivered_quantity'] ?? 0), 0) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['invoiceable_quantity'] ?? 0), 0) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 align-middle">
-                                    <input type="number" min="0" step="1" max="{{ (float) ($row['invoiceable_quantity'] ?? 0) }}" wire:model.blur="items.{{ $index }}.quantity" class="block w-full rounded-md border-slate-300 text-right text-sm shadow-sm erp-focus-ring">
+                                    <input type="number" min="0" step="1" max="{{ (float) ($row['invoiceable_quantity'] ?? 0) }}" wire:model.live.debounce.250ms="items.{{ $index }}.quantity" class="block w-full rounded-md border-slate-300 text-right text-sm shadow-sm erp-focus-ring">
                                     @error("items.$index.quantity") <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                                 </td>
-                                <td class="border border-slate-300 px-3 py-2 align-middle">
-                                    <input type="number" min="0" step="0.01" wire:model.blur="items.{{ $index }}.price" class="block w-full rounded-md border-slate-300 text-right text-sm shadow-sm erp-focus-ring">
-                                </td>
+                                <td class="border border-slate-300 px-3 py-2 text-right align-middle font-medium text-slate-700">{{ number_format((float) ($row['price'] ?? 0), 2) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['tax_amount'] ?? 0), 2) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle font-semibold text-slate-950">{{ number_format((float) ($row['total'] ?? 0), 2) }}</td>
                             </tr>
@@ -142,11 +140,7 @@
                 </label>
                 <label class="block">
                     <span class="text-sm font-medium text-slate-700">Tax Rate</span>
-                    <select wire:model.live="tax_rate" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
-                        @foreach ($taxRates as $rate)
-                            <option value="{{ $rate }}">{{ $rate }}%</option>
-                        @endforeach
-                    </select>
+                    <input type="text" value="{{ (int) $tax_rate }}%" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-950 shadow-sm">
                 </label>
             </div>
 
