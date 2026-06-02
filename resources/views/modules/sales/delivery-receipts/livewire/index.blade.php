@@ -107,19 +107,43 @@
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->customer_po ?: 'None' }}</td>
                                 <td class="px-3 py-3 align-middle">
                                     @if ($receipt->salesInvoices->isEmpty())
-                                        <span class="inline-flex rounded-full bg-slate-600 px-2.5 py-1 text-xs font-semibold text-white">No Invoice</span>
+                                        <span class="bg-slate-600 text-xs font-semibold text-white" style="display:inline-flex;height:24px;align-items:center;border-radius:9999px;padding:0 10px;line-height:1;white-space:nowrap;">No Invoice</span>
+                                    @elseif ($receipt->salesInvoices->count() === 1)
+                                        @php
+                                            $invoice = $receipt->salesInvoices->first();
+                                            $canViewInvoices = auth()->user()?->can('sales-invoices.view');
+                                        @endphp
+                                        @if ($canViewInvoices)
+                                            <a href="{{ route('sales.invoices.show', $invoice) }}" class="bg-cyan-600 text-xs font-semibold text-white hover:bg-cyan-700" style="display:inline-flex;height:24px;max-width:100%;align-items:center;border-radius:9999px;padding:0 10px;line-height:1;white-space:nowrap;">
+                                                <span class="truncate">{{ $invoice->sales_invoice_no }}</span>
+                                            </a>
+                                        @else
+                                            <span class="bg-cyan-600 text-xs font-semibold text-white" style="display:inline-flex;height:24px;max-width:100%;align-items:center;border-radius:9999px;padding:0 10px;line-height:1;white-space:nowrap;">
+                                                <span class="truncate">{{ $invoice->sales_invoice_no }}</span>
+                                            </span>
+                                        @endif
                                     @else
-                                        <div class="flex flex-wrap gap-1">
-                                            @foreach ($receipt->salesInvoices->take(2) as $invoice)
-                                                @if (auth()->user()?->can('sales-invoices.view'))
-                                                    <a href="{{ route('sales.invoices.show', $invoice) }}" class="inline-flex rounded-full bg-cyan-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-cyan-700">{{ $invoice->sales_invoice_no }}</a>
-                                                @else
-                                                    <span class="inline-flex rounded-full bg-cyan-600 px-2.5 py-1 text-xs font-semibold text-white">{{ $invoice->sales_invoice_no }}</span>
-                                                @endif
-                                            @endforeach
-                                            @if ($receipt->salesInvoices->count() > 2)
-                                                <span class="inline-flex rounded-full bg-slate-700 px-2.5 py-1 text-xs font-semibold text-white">+{{ $receipt->salesInvoices->count() - 2 }}</span>
-                                            @endif
+                                        @php
+                                            $canViewInvoices = auth()->user()?->can('sales-invoices.view');
+                                        @endphp
+                                        <div x-data="{ open: false }" class="relative inline-block max-w-full" @click.outside="open = false">
+                                            <button type="button" @click="open = ! open" class="bg-cyan-600 text-xs font-semibold text-white hover:bg-cyan-700" style="display:inline-flex;height:24px;max-width:100%;align-items:center;gap:4px;border-radius:9999px;padding:0 10px;line-height:1;white-space:nowrap;">
+                                                <span>{{ $receipt->salesInvoices->count() }} invoices</span>
+                                                <svg class="size-3.5 shrink-0 transition" :class="{ 'rotate-180': open }" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>
+                                            </button>
+                                            <div x-show="open" x-transition x-cloak class="absolute left-0 z-30 mt-2 max-h-64 w-60 overflow-y-auto rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                                                @foreach ($receipt->salesInvoices as $invoice)
+                                                    @if ($canViewInvoices)
+                                                        <a href="{{ route('sales.invoices.show', $invoice) }}" class="block whitespace-nowrap px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100">
+                                                            {{ $invoice->sales_invoice_no }}
+                                                        </a>
+                                                    @else
+                                                        <div class="whitespace-nowrap px-3 py-2 text-sm font-semibold text-slate-800">
+                                                            {{ $invoice->sales_invoice_no }}
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
                                         </div>
                                     @endif
                                 </td>
