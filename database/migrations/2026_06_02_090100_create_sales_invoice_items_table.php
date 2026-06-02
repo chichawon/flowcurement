@@ -26,6 +26,8 @@ return new class extends Migration
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('tax_rate', 8, 2)->default(0);
             $table->decimal('tax_amount', 15, 2)->default(0);
+            $table->decimal('withholding_tax_rate', 8, 2)->default(0);
+            $table->decimal('withholding_tax_amount', 15, 2)->default(0);
             $table->decimal('total', 15, 2)->default(0);
             $table->timestamps();
 

@@ -26,6 +26,8 @@ class SalesInvoiceItem extends Model
         'subtotal',
         'tax_rate',
         'tax_amount',
+        'withholding_tax_rate',
+        'withholding_tax_amount',
         'total',
     ];
 
@@ -40,6 +42,8 @@ class SalesInvoiceItem extends Model
             'subtotal' => 'decimal:2',
             'tax_rate' => 'decimal:2',
             'tax_amount' => 'decimal:2',
+            'withholding_tax_rate' => 'decimal:2',
+            'withholding_tax_amount' => 'decimal:2',
             'total' => 'decimal:2',
         ];
     }

@@ -117,15 +117,21 @@
             text-transform: uppercase;
         }
 
-        .status-issued {
+        .status-unpaid {
             background: #0891b2;
+        }
+
+        .status-paid,
+        .status-collected {
+            background: #059669;
         }
 
         .status-pending {
             background: #d97706;
         }
 
-        .status-void {
+        .status-void,
+        .status-cancelled {
             background: #dc2626;
         }
     </style>
@@ -207,12 +213,14 @@
         <thead>
             <tr>
                 <th style="width: 5%;">#</th>
-                <th style="width: 27%;">Item</th>
-                <th style="width: 25%;">Description</th>
-                <th style="width: 10%;">Qty</th>
-                <th style="width: 10%;">UOM</th>
-                <th style="width: 12%;">Unit Price</th>
-                <th style="width: 11%;">Total</th>
+                <th style="width: 21%;">Item</th>
+                <th style="width: 20%;">Description</th>
+                <th style="width: 9%;">WHT</th>
+                <th style="width: 7%;">Qty</th>
+                <th style="width: 8%;">UOM</th>
+                <th style="width: 11%;">Unit Price</th>
+                <th style="width: 10%;">Subtotal</th>
+                <th style="width: 9%;">Total</th>
             </tr>
         </thead>
         <tbody>
@@ -226,9 +234,11 @@
                         @endif
                     </td>
                     <td>{{ $row->description ?: '-' }}</td>
+                    <td class="right">{{ number_format((float) $row->withholding_tax_rate, 0) }}%<br>-{{ number_format((float) $row->withholding_tax_amount, 2) }}</td>
                     <td class="center">{{ number_format((float) $row->quantity, 0) }}</td>
                     <td class="center">{{ $row->unitMeasure?->name }}</td>
                     <td class="right">{{ number_format((float) $row->price, 2) }}</td>
+                    <td class="right">{{ number_format((float) $row->subtotal, 2) }}</td>
                     <td class="right">{{ number_format((float) $row->total, 2) }}</td>
                 </tr>
             @endforeach
@@ -243,6 +253,10 @@
         <tr>
             <td style="font-weight: 700;">Tax Amount ({{ number_format((float) $salesInvoice->tax_rate, 0) }}%)</td>
             <td class="right" style="font-weight: 700;">{{ number_format((float) $salesInvoice->tax_amount, 2) }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 700;">WHT Amount</td>
+            <td class="right" style="font-weight: 700;">-{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
         </tr>
         <tr class="grand-total">
             <td>Total Amount</td>

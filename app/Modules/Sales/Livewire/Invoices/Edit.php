@@ -33,7 +33,7 @@ class Edit extends Component
     public string $tax_rate = '0';
     public string $remarks = '';
     public array $items = [];
-    public array $totals = ['subtotal' => 0, 'tax_amount' => 0, 'total_amount' => 0, 'balance_amount' => 0];
+    public array $totals = ['subtotal' => 0, 'tax_amount' => 0, 'withholding_tax_amount' => 0, 'total_amount' => 0, 'balance_amount' => 0];
 
     public function mount(int|SalesInvoice $salesInvoice): void
     {
@@ -79,6 +79,7 @@ class Edit extends Component
             'statuses' => SalesInvoiceOptions::STATUSES,
             'currencies' => SalesInvoiceOptions::CURRENCIES,
             'taxRates' => SalesInvoiceOptions::TAX_RATES,
+            'withholdingTaxRates' => SalesInvoiceOptions::WITHHOLDING_TAX_RATES,
             'editing' => true,
         ]);
     }
@@ -116,6 +117,8 @@ class Edit extends Component
             'subtotal' => number_format((float) $item->subtotal, 2, '.', ''),
             'tax_rate' => number_format((float) $item->tax_rate, 2, '.', ''),
             'tax_amount' => number_format((float) $item->tax_amount, 2, '.', ''),
+            'withholding_tax_rate' => (string) (int) $item->withholding_tax_rate,
+            'withholding_tax_amount' => number_format((float) $item->withholding_tax_amount, 2, '.', ''),
             'total' => number_format((float) $item->total, 2, '.', ''),
         ])->all();
         $this->recomputeTotals();
@@ -128,12 +131,18 @@ class Edit extends Component
             $price = max((float) ($row['price'] ?? 0), 0);
             $subtotal = round($quantity * $price, 2);
             $taxAmount = round($subtotal * ((float) $this->tax_rate / 100), 2);
+            $withholdingTaxRate = (float) ($row['withholding_tax_rate'] ?? 0);
+            $grossTotal = round($subtotal + $taxAmount, 2);
+            $withholdingBase = ((float) $this->tax_rate) > 0 ? $subtotal : $grossTotal;
+            $withholdingTaxAmount = round($withholdingBase * ($withholdingTaxRate / 100), 2);
             $this->items[$index]['quantity'] = (string) $quantity;
             $this->items[$index]['price'] = number_format($price, 2, '.', '');
             $this->items[$index]['subtotal'] = number_format($subtotal, 2, '.', '');
             $this->items[$index]['tax_rate'] = number_format((float) $this->tax_rate, 2, '.', '');
             $this->items[$index]['tax_amount'] = number_format($taxAmount, 2, '.', '');
-            $this->items[$index]['total'] = number_format($subtotal + $taxAmount, 2, '.', '');
+            $this->items[$index]['withholding_tax_rate'] = (string) (int) $withholdingTaxRate;
+            $this->items[$index]['withholding_tax_amount'] = number_format($withholdingTaxAmount, 2, '.', '');
+            $this->items[$index]['total'] = number_format($grossTotal - $withholdingTaxAmount, 2, '.', '');
         }
     }
 
@@ -162,6 +171,7 @@ class Edit extends Component
             'contact_no' => $this->contact_no,
             'currency' => $this->currency,
             'tax_rate' => $this->tax_rate,
+            'withholding_tax_rate' => '0',
             'status' => $this->invoice->status,
             'remarks' => $this->remarks,
             'items' => $this->items,

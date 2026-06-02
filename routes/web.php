@@ -116,7 +116,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/create', [SalesInvoicePageController::class, 'create'])->middleware('permission:sales-invoices.create')->name('create');
             Route::get('/{salesInvoice}/print', [SalesInvoicePageController::class, 'print'])->middleware('permission:sales-invoices.print')->name('print');
             Route::get('/{salesInvoice}', [SalesInvoicePageController::class, 'show'])->name('show');
-            Route::post('/{salesInvoice}/issue', [SalesInvoicePageController::class, 'issue'])->middleware('permission:sales-invoices.issue')->name('issue');
             Route::get('/{salesInvoice}/edit', [SalesInvoicePageController::class, 'edit'])->middleware('permission:sales-invoices.update')->name('edit');
         });
 });

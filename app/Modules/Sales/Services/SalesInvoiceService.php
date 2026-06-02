@@ -57,11 +57,10 @@ class SalesInvoiceService
     public function eligibleDeliveryReceipts(): Collection
     {
         return DeliveryReceipt::query()
-            ->where('remarks', 'completed')
             ->where('status', '!=', 'cancelled')
             ->whereHas('items', function (Builder $query): void {
                 $query->where('delivered_quantity', '>', 0)
-                    ->whereRaw('delivered_quantity > COALESCE((select sum(sales_invoice_items.quantity) from sales_invoice_items inner join sales_invoices on sales_invoices.id = sales_invoice_items.sales_invoice_id where sales_invoice_items.delivery_receipt_item_id = delivery_receipt_items.id and sales_invoices.deleted_at is null and sales_invoices.status != ?), 0)', ['void']);
+                    ->whereRaw('delivered_quantity > COALESCE((select sum(sales_invoice_items.quantity) from sales_invoice_items inner join sales_invoices on sales_invoices.id = sales_invoice_items.sales_invoice_id where sales_invoice_items.delivery_receipt_item_id = delivery_receipt_items.id and sales_invoices.deleted_at is null and sales_invoices.status != ?), 0)', ['cancelled']);
             })
             ->latest('id')
             ->get(['id', 'delivery_receipt_no', 'sales_order_no', 'company_name', 'sales_order_id', 'business_partner_id']);
@@ -81,7 +80,7 @@ class SalesInvoiceService
             return null;
         }
 
-        if ($receipt->remarks !== 'completed' || $receipt->status === 'cancelled') {
+        if ($receipt->status === 'cancelled') {
             return null;
         }
 
@@ -118,6 +117,8 @@ class SalesInvoiceService
                     'subtotal' => number_format($subtotal, 2, '.', ''),
                     'tax_rate' => number_format($taxRate, 2, '.', ''),
                     'tax_amount' => number_format($taxAmount, 2, '.', ''),
+                    'withholding_tax_rate' => '0',
+                    'withholding_tax_amount' => '0.00',
                     'total' => number_format($subtotal + $taxAmount, 2, '.', ''),
                 ];
             })
@@ -187,41 +188,34 @@ class SalesInvoiceService
         return DB::transaction(function () use ($invoice): SalesInvoice {
             $old = $invoice->toArray();
             $invoice->update([
-                'status' => 'void',
+                'status' => 'cancelled',
                 'updated_by' => auth()->id(),
             ]);
             $this->refreshDeliveryReceiptBillingStatus((int) $invoice->delivery_receipt_id);
-            app(AuditTrailService::class)->record(self::MODULE, 'voided', $invoice, $old, $invoice->toArray(), 'Sales invoice voided: '.$invoice->sales_invoice_no);
+            app(AuditTrailService::class)->record(self::MODULE, 'cancelled', $invoice, $old, $invoice->toArray(), 'Sales invoice cancelled: '.$invoice->sales_invoice_no);
 
             return $invoice->refresh();
         });
     }
 
-    public function issue(SalesInvoice $invoice): SalesInvoice
-    {
-        Gate::authorize('issue', $invoice);
-
-        return DB::transaction(function () use ($invoice): SalesInvoice {
-            $old = $invoice->toArray();
-            $invoice->update([
-                'status' => 'issued',
-                'updated_by' => auth()->id(),
-            ]);
-            app(AuditTrailService::class)->record(self::MODULE, 'issued', $invoice, $old, $invoice->toArray(), 'Sales invoice issued: '.$invoice->sales_invoice_no);
-
-            return $invoice->refresh();
-        });
-    }
-
-    public function totals(array $items, float|int|string $taxRate): array
+    public function totals(array $items, float|int|string $taxRate, float|int|string $withholdingTaxRate = 0): array
     {
         $subtotal = collect($items)->sum(fn (array $row) => (float) ($row['quantity'] ?? 0) * (float) ($row['price'] ?? 0));
         $taxAmount = round($subtotal * ((float) $taxRate / 100), 2);
-        $total = round($subtotal + $taxAmount, 2);
+        $withholdingTaxAmount = collect($items)->sum(function (array $row) use ($taxRate): float {
+            $rowSubtotal = (float) ($row['subtotal'] ?? ((float) ($row['quantity'] ?? 0) * (float) ($row['price'] ?? 0)));
+            $rowTaxAmount = (float) ($row['tax_amount'] ?? round($rowSubtotal * ((float) $taxRate / 100), 2));
+            $rowGrossTotal = round($rowSubtotal + $rowTaxAmount, 2);
+            $withholdingBase = ((float) $taxRate) > 0 ? $rowSubtotal : $rowGrossTotal;
+
+            return round($withholdingBase * ((float) ($row['withholding_tax_rate'] ?? 0) / 100), 2);
+        });
+        $total = round($subtotal + $taxAmount - $withholdingTaxAmount, 2);
 
         return [
             'subtotal' => round($subtotal, 2),
             'tax_amount' => $taxAmount,
+            'withholding_tax_amount' => $withholdingTaxAmount,
             'total_amount' => $total,
             'balance_amount' => $total,
         ];
@@ -247,7 +241,8 @@ class SalesInvoiceService
             'contact_no' => $payload['contact_no'] ?? null,
             'currency' => $payload['currency'],
             'tax_rate' => (float) $payload['tax_rate'],
-            'status' => $payload['status'] ?? 'pending',
+            'withholding_tax_rate' => (float) ($payload['withholding_tax_rate'] ?? 0),
+            'status' => $payload['status'] ?? 'unpaid',
             'remarks' => $payload['remarks'] ?? null,
             'updated_by' => auth()->id(),
         ], $totals, $creating ? [
@@ -283,6 +278,10 @@ class SalesInvoiceService
             $subtotal = round($quantity * $price, 2);
             $taxRate = (float) ($invoice->tax_rate ?? 0);
             $taxAmount = round($subtotal * ($taxRate / 100), 2);
+            $grossTotal = round($subtotal + $taxAmount, 2);
+            $withholdingTaxRate = (float) ($row['withholding_tax_rate'] ?? 0);
+            $withholdingBase = $taxRate > 0 ? $subtotal : $grossTotal;
+            $withholdingTaxAmount = round($withholdingBase * ($withholdingTaxRate / 100), 2);
 
             SalesInvoiceItem::query()->create([
                 'sales_invoice_id' => $invoice->id,
@@ -301,7 +300,9 @@ class SalesInvoiceService
                 'subtotal' => $subtotal,
                 'tax_rate' => $taxRate,
                 'tax_amount' => $taxAmount,
-                'total' => round($subtotal + $taxAmount, 2),
+                'withholding_tax_rate' => $withholdingTaxRate,
+                'withholding_tax_amount' => $withholdingTaxAmount,
+                'total' => round($grossTotal - $withholdingTaxAmount, 2),
             ]);
             $saved++;
         }
@@ -317,8 +318,8 @@ class SalesInvoiceService
             ->whereKey($deliveryReceiptId)
             ->first(['id', 'status', 'remarks']);
 
-        if (! $receipt || $receipt->remarks !== 'completed' || $receipt->status === 'cancelled') {
-            throw new \RuntimeException('Only completed delivery receipts can be invoiced.');
+        if (! $receipt || $receipt->status === 'cancelled') {
+            throw new \RuntimeException('Cancelled delivery receipts cannot be invoiced.');
         }
     }
 
@@ -330,7 +331,7 @@ class SalesInvoiceService
 
         $hasActiveInvoice = SalesInvoice::query()
             ->where('delivery_receipt_id', $deliveryReceiptId)
-            ->where('status', '!=', 'void')
+            ->where('status', '!=', 'cancelled')
             ->exists();
 
         DeliveryReceipt::query()
@@ -363,7 +364,7 @@ class SalesInvoiceService
             ->select('delivery_receipt_item_id', DB::raw('SUM(quantity) as invoiced_total'))
             ->whereIn('delivery_receipt_id', $deliveryReceiptIds)
             ->when($exceptInvoiceId, fn (Builder $query) => $query->where('sales_invoice_id', '!=', $exceptInvoiceId))
-            ->whereHas('salesInvoice', fn (Builder $query) => $query->where('status', '!=', 'void'))
+            ->whereHas('salesInvoice', fn (Builder $query) => $query->where('status', '!=', 'cancelled'))
             ->groupBy('delivery_receipt_item_id')
             ->pluck('invoiced_total', 'delivery_receipt_item_id')
             ->map(fn ($value) => (float) $value)

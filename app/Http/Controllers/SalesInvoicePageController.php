@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Modules\Sales\Models\SalesInvoice;
-use App\Modules\Sales\Services\SalesInvoiceService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
@@ -63,17 +62,6 @@ class SalesInvoicePageController extends Controller
         }
 
         return view('modules.sales.invoices.edit', ['salesInvoice' => $salesInvoice]);
-    }
-
-    public function issue(SalesInvoice $salesInvoice, SalesInvoiceService $service): RedirectResponse
-    {
-        Gate::authorize('issue', $salesInvoice);
-
-        $service->issue($salesInvoice);
-
-        return redirect()
-            ->route('sales.invoices.show', $salesInvoice)
-            ->with('toast', 'Sales invoice issued successfully.');
     }
 
     private function loadSalesInvoice(SalesInvoice $salesInvoice): void

@@ -73,29 +73,35 @@
         </div>
         <div class="erp-panel-body">
             @error('items') <div class="mb-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{{ $message }}</div> @enderror
-            <div class="relative overflow-visible border border-slate-400 bg-white">
-                <table class="min-w-[1250px] w-full table-fixed border-collapse text-sm">
+            <div class="relative w-full max-w-full overflow-x-auto overflow-y-visible border border-slate-400 bg-white pb-2">
+                <table class="table-fixed border-collapse text-sm" style="min-width: 1540px; width: 1540px;">
                     <colgroup>
-                        <col class="w-[16%]">
-                        <col class="w-[17%]">
-                        <col class="w-[9%]">
-                        <col class="w-[10%]">
-                        <col class="w-[10%]">
-                        <col class="w-[8%]">
-                        <col class="w-[14%]">
-                        <col class="w-[8%]">
-                        <col class="w-[8%]">
+                        <col style="width: 170px;">
+                        <col style="width: 210px;">
+                        <col style="width: 115px;">
+                        <col style="width: 110px;">
+                        <col style="width: 125px;">
+                        <col style="width: 125px;">
+                        <col style="width: 115px;">
+                        <col style="width: 145px;">
+                        <col style="width: 120px;">
+                        <col style="width: 120px;">
+                        <col style="width: 120px;">
+                        <col style="width: 165px;">
                     </colgroup>
                     <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
                         <tr>
                             <th class="border border-slate-400 px-3 py-2 text-left">Item Name</th>
                             <th class="border border-slate-400 px-3 py-2 text-left">Description</th>
+                            <th class="border border-slate-400 px-3 py-2 text-right">WHT</th>
                             <th class="border border-slate-400 px-3 py-2 text-left">Unit</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Delivered</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Invoiceable</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Qty</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Price</th>
+                            <th class="border border-slate-400 px-3 py-2 text-right">Subtotal</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Tax</th>
+                            <th class="border border-slate-400 px-3 py-2 text-right">WHT Amt</th>
                             <th class="border border-slate-400 px-3 py-2 text-right">Total</th>
                         </tr>
                     </thead>
@@ -106,6 +112,14 @@
                                 <td class="border border-slate-300 px-3 py-2 align-middle">
                                     <input type="text" wire:model.blur="items.{{ $index }}.description" class="block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
                                 </td>
+                                <td class="border border-slate-300 px-3 py-2 align-middle">
+                                    <select wire:model.live="items.{{ $index }}.withholding_tax_rate" class="block w-full rounded-md border-slate-300 text-right text-sm shadow-sm erp-focus-ring">
+                                        @foreach ($withholdingTaxRates as $option)
+                                            <option value="{{ $option }}">{{ $option }}%</option>
+                                        @endforeach
+                                    </select>
+                                    @error("items.$index.withholding_tax_rate") <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                                </td>
                                 <td class="border border-slate-300 px-3 py-2 align-middle text-slate-700">{{ str($row['unit_measure_name'] ?? '')->headline() }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['delivered_quantity'] ?? 0), 0) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['invoiceable_quantity'] ?? 0), 0) }}</td>
@@ -114,11 +128,13 @@
                                     @error("items.$index.quantity") <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                                 </td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle font-medium text-slate-700">{{ number_format((float) ($row['price'] ?? 0), 2) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['subtotal'] ?? 0), 2) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['tax_amount'] ?? 0), 2) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right align-middle text-slate-700">{{ number_format((float) ($row['withholding_tax_amount'] ?? 0), 2) }}</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right align-middle font-semibold text-slate-950">{{ number_format((float) ($row['total'] ?? 0), 2) }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="border border-slate-300 px-4 py-10 text-center text-sm text-slate-500">Select a delivery receipt to load invoiceable items.</td></tr>
+                            <tr><td colspan="12" class="border border-slate-300 px-4 py-10 text-center text-sm text-slate-500">Select a delivery receipt to load invoiceable items.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -160,6 +176,10 @@
                         <tr>
                             <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount</td>
                             <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format((float) ($totals['tax_amount'] ?? 0), 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">WHT Amount</td>
+                            <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">-{{ number_format((float) ($totals['withholding_tax_amount'] ?? 0), 2) }}</td>
                         </tr>
                     </tbody>
                     <tfoot>

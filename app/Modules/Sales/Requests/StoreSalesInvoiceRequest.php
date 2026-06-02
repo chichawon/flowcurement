@@ -29,6 +29,7 @@ class StoreSalesInvoiceRequest extends FormRequest
             'business_partner_id' => ['required', Rule::exists('business_partners', 'id')],
             'currency' => ['required', Rule::in(SalesInvoiceOptions::CURRENCIES)],
             'tax_rate' => ['required', Rule::in(SalesInvoiceOptions::TAX_RATES)],
+            'withholding_tax_rate' => ['required', Rule::in(SalesInvoiceOptions::WITHHOLDING_TAX_RATES)],
             'remarks' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.delivery_receipt_item_id' => ['required', Rule::exists('delivery_receipt_items', 'id')],
@@ -38,6 +39,7 @@ class StoreSalesInvoiceRequest extends FormRequest
             'items.*.quantity' => ['required', 'numeric', 'min:0'],
             'items.*.invoiceable_quantity' => ['required', 'numeric', 'min:0'],
             'items.*.price' => ['required', 'numeric', 'min:0'],
+            'items.*.withholding_tax_rate' => ['required', Rule::in(SalesInvoiceOptions::WITHHOLDING_TAX_RATES)],
             'items.*.description' => ['nullable', 'string', 'max:1000'],
         ];
     }

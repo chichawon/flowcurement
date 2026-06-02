@@ -21,6 +21,7 @@
                 <div><p class="text-xs font-semibold uppercase text-slate-500">Customer PO</p><p class="mt-1 text-sm font-semibold text-slate-950">{{ $salesInvoice->customer_po ?: 'None' }}</p></div>
                 <div><p class="text-xs font-semibold uppercase text-slate-500">Contact Person</p><p class="mt-1 text-sm font-semibold text-slate-950">{{ $salesInvoice->contact_person ?: 'None' }}</p></div>
                 <div><p class="text-xs font-semibold uppercase text-slate-500">Contact No</p><p class="mt-1 text-sm font-semibold text-slate-950">{{ $salesInvoice->contact_no ?: 'None' }}</p></div>
+                <div><p class="text-xs font-semibold uppercase text-slate-500">Tax Rate</p><p class="mt-1 text-sm font-semibold text-slate-950">{{ number_format((float) $salesInvoice->tax_rate, 0) }}%</p></div>
             </div>
         </section>
 
@@ -30,21 +31,23 @@
             </div>
             <div class="erp-panel-body">
                 <div class="relative overflow-visible border border-slate-400 bg-white">
-                    <table class="min-w-[1050px] w-full table-fixed border-collapse text-sm">
+                    <table class="min-w-[1220px] w-full table-fixed border-collapse text-sm">
                         <colgroup>
+                            <col class="w-[16%]">
                             <col class="w-[18%]">
-                            <col class="w-[19%]">
+                            <col class="w-[9%]">
+                            <col class="w-[7%]">
+                            <col class="w-[13%]">
                             <col class="w-[10%]">
                             <col class="w-[8%]">
-                            <col class="w-[16%]">
+                            <col class="w-[8%]">
                             <col class="w-[11%]">
-                            <col class="w-[9%]">
-                            <col class="w-[9%]">
                         </colgroup>
                         <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
                             <tr>
                                 <th class="border border-slate-400 px-3 py-2 text-left">Item Name</th>
                                 <th class="border border-slate-400 px-3 py-2 text-left">Description</th>
+                                <th class="border border-slate-400 px-3 py-2 text-right">WHT</th>
                                 <th class="border border-slate-400 px-3 py-2 text-left">Unit</th>
                                 <th class="border border-slate-400 px-3 py-2 text-right">Qty</th>
                                 <th class="border border-slate-400 px-3 py-2 text-right">Price</th>
@@ -58,6 +61,7 @@
                                 <tr>
                                     <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-950">{{ $row->item_name }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-slate-700">{{ $row->description ?: '-' }}</td>
+                                    <td class="border border-slate-300 px-3 py-2 text-right text-slate-700">{{ number_format((float) $row->withholding_tax_rate, 0) }}% / {{ number_format((float) $row->withholding_tax_amount, 2) }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-slate-700">{{ str($row->unitMeasure?->name)->headline() }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-right text-slate-700">{{ number_format((float) $row->quantity, 0) }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-right text-slate-700">{{ number_format((float) $row->price, 2) }}</td>
@@ -92,6 +96,10 @@
                                 <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount</td>
                                 <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format((float) $salesInvoice->tax_amount, 2) }}</td>
                             </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">WHT Amount</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">-{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
+                            </tr>
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-950 text-white">
@@ -107,41 +115,13 @@
             </div>
         </section>
 
-        <div x-data="{ issueModalOpen: false }">
-            <div class="flex items-center justify-end gap-2">
-                <a href="{{ route('sales.invoices.index') }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back</a>
-                @can('print', $salesInvoice)
-                    <a href="{{ route('sales.invoices.print', $salesInvoice) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
-                @endcan
-                @can('issue', $salesInvoice)
-                    <button type="button" @click="issueModalOpen = true" class="rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
-                @endcan
-                @can('update', $salesInvoice)
-                    <a href="{{ route('sales.invoices.edit', $salesInvoice) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
-                @endcan
-            </div>
-
-            @can('issue', $salesInvoice)
-                <div x-show="issueModalOpen" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0" role="dialog" aria-modal="true">
-                    <div class="absolute inset-0 bg-slate-950/60" @click="issueModalOpen = false"></div>
-                    <div class="relative w-full max-w-sm rounded-xl bg-white shadow-2xl">
-                        <div class="border-b border-slate-200 px-5 py-4">
-                            <h3 class="text-base font-semibold text-slate-950">Issue sales invoice?</h3>
-                            <p class="mt-1 text-sm text-slate-500">This will mark the invoice as official billing and lock item edits.</p>
-                        </div>
-                        <div class="px-5 py-4">
-                            <p class="text-sm text-slate-600">Issue:</p>
-                            <p class="mt-1 text-sm font-semibold text-slate-950">{{ $salesInvoice->sales_invoice_no }}</p>
-                        </div>
-                        <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
-                            <button type="button" @click="issueModalOpen = false" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
-                            <form method="POST" action="{{ route('sales.invoices.issue', $salesInvoice) }}">
-                                @csrf
-                                <button type="submit" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+        <div class="flex items-center justify-end gap-2">
+            <a href="{{ route('sales.invoices.index') }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back</a>
+            @can('print', $salesInvoice)
+                <a href="{{ route('sales.invoices.print', $salesInvoice) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
+            @endcan
+            @can('update', $salesInvoice)
+                <a href="{{ route('sales.invoices.edit', $salesInvoice) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
             @endcan
         </div>
     </div>

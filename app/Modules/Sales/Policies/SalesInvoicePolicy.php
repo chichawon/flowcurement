@@ -14,17 +14,12 @@ class SalesInvoicePolicy
     public function update(User $actor, SalesInvoice $salesInvoice): bool
     {
         return $actor->can(SalesInvoicePermissions::UPDATE)
-            && $salesInvoice->status === 'pending';
+            && $salesInvoice->status === 'unpaid';
     }
     public function delete(User $actor, SalesInvoice $salesInvoice): bool
     {
         return $actor->can(SalesInvoicePermissions::DELETE)
-            && ! in_array($salesInvoice->status, ['paid', 'void'], true);
-    }
-    public function issue(User $actor, SalesInvoice $salesInvoice): bool
-    {
-        return $actor->can(SalesInvoicePermissions::ISSUE)
-            && $salesInvoice->status === 'pending';
+            && ! in_array($salesInvoice->status, ['paid', 'collected', 'cancelled'], true);
     }
     public function print(User $actor, SalesInvoice $salesInvoice): bool { return $actor->can(SalesInvoicePermissions::PRINT); }
 }

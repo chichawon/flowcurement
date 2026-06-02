@@ -28,10 +28,12 @@ return new class extends Migration
             $table->decimal('tax_rate', 8, 2)->default(0);
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('tax_amount', 15, 2)->default(0);
+            $table->decimal('withholding_tax_rate', 8, 2)->default(0);
+            $table->decimal('withholding_tax_amount', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->decimal('amount_paid', 15, 2)->default(0);
             $table->decimal('balance_amount', 15, 2)->default(0);
-            $table->string('status')->default('pending')->index();
+            $table->string('status')->default('unpaid')->index();
             $table->text('remarks')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
