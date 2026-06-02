@@ -3,6 +3,8 @@
 @php
     $classes = [
         'pending' => 'bg-amber-600 text-white',
+        'billed' => 'bg-cyan-600 text-white',
+        'on_hold' => 'bg-red-600 text-white',
         'completed' => 'bg-emerald-600 text-white',
         'partial' => 'bg-blue-600 text-white',
         'served' => 'bg-emerald-600 text-white',

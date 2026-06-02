@@ -55,8 +55,9 @@
                         <col class="w-[14%]">
                         <col class="w-[16%]">
                         <col class="w-[13%]">
-                        <col class="w-[18%]">
-                        <col class="w-[13%]">
+                        <col class="w-[16%]">
+                        <col class="w-[10%]">
+                        <col class="w-[10%]">
                     </colgroup>
                     <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                         <tr>
@@ -67,6 +68,7 @@
                             <th class="px-3 py-3 text-left">Company</th>
                             <th class="px-3 py-3 text-left">Customer P.O</th>
                             <th class="px-3 py-3 text-left">Invoice Reference</th>
+                            <th class="px-3 py-3 text-center">Remarks</th>
                             <th class="px-3 py-3 text-center">Status</th>
                         </tr>
                     </thead>
@@ -86,6 +88,9 @@
                                             @endcan
                                             @can('update', $receipt)
                                                 <button type="button" wire:click="openUploadDetails({{ $receipt->id }})" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Upload Details</button>
+                                            @endcan
+                                            @can('print', $receipt)
+                                                <a href="{{ route('sales.delivery-receipts.print', $receipt) }}" target="_blank" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Print</a>
                                             @endcan
                                             @can('cancel', $receipt)
                                                 <button type="button" wire:click="promptVoidReceipt({{ $receipt->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Void</button>
@@ -118,10 +123,11 @@
                                         </div>
                                     @endif
                                 </td>
+                                <td class="px-3 py-3 text-center align-middle"><x-sales.status-badge :status="$receipt->remarks ?? 'on_hold'" /></td>
                                 <td class="px-3 py-3 text-center align-middle"><x-sales.status-badge :status="$receipt->status" /></td>
                             </tr>
                         @empty
-                            <tr><td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">No delivery receipts found.</td></tr>
+                            <tr><td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">No delivery receipts found.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

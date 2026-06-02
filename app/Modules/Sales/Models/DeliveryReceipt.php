@@ -29,6 +29,7 @@ class DeliveryReceipt extends Model
         'company_address',
         'contact_person',
         'contact_no',
+        'remarks',
         'status',
         'created_by',
         'updated_by',

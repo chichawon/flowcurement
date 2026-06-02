@@ -46,6 +46,7 @@
             </label>
             <div class="flex flex-wrap items-center gap-3 text-xs">
                 <span wire:loading wire:target="attachments" class="font-semibold text-cyan-700">Uploading attachments...</span>
+                @error('attachments') <span class="font-semibold text-red-600">{{ $message }}</span> @enderror
                 @error('attachments.*') <span class="font-semibold text-red-600">{{ $message }}</span> @enderror
             </div>
 

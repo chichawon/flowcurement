@@ -57,7 +57,8 @@ class SalesInvoiceService
     public function eligibleDeliveryReceipts(): Collection
     {
         return DeliveryReceipt::query()
-            ->where('status', 'completed')
+            ->where('remarks', 'completed')
+            ->where('status', '!=', 'cancelled')
             ->whereHas('items', function (Builder $query): void {
                 $query->where('delivered_quantity', '>', 0)
                     ->whereRaw('delivered_quantity > COALESCE((select sum(sales_invoice_items.quantity) from sales_invoice_items inner join sales_invoices on sales_invoices.id = sales_invoice_items.sales_invoice_id where sales_invoice_items.delivery_receipt_item_id = delivery_receipt_items.id and sales_invoices.deleted_at is null and sales_invoices.status != ?), 0)', ['void']);
@@ -80,7 +81,7 @@ class SalesInvoiceService
             return null;
         }
 
-        if ($receipt->status !== 'completed') {
+        if ($receipt->remarks !== 'completed' || $receipt->status === 'cancelled') {
             return null;
         }
 
@@ -152,6 +153,7 @@ class SalesInvoiceService
             $payload['sales_invoice_no'] = $this->nextSalesInvoiceNo();
             $invoice = SalesInvoice::query()->create($this->headerPayload($payload));
             $this->syncItems($invoice, $payload['items'] ?? []);
+            $this->refreshDeliveryReceiptBillingStatus((int) $invoice->delivery_receipt_id);
             app(AuditTrailService::class)->record(self::MODULE, 'created', $invoice, null, $invoice->load('items')->toArray(), 'Sales invoice created: '.$invoice->sales_invoice_no);
 
             return $invoice->refresh();
@@ -165,10 +167,13 @@ class SalesInvoiceService
         return DB::transaction(function () use ($invoice, $payload): SalesInvoice {
             $this->ensureDeliveryReceiptIsCompleted((int) ($payload['delivery_receipt_id'] ?? 0));
             $this->applySourceTaxRate($payload);
+            $oldDeliveryReceiptId = (int) $invoice->delivery_receipt_id;
             $old = $invoice->load('items')->toArray();
             $invoice->update($this->headerPayload($payload, false));
             $invoice->items()->delete();
             $this->syncItems($invoice, $payload['items'] ?? []);
+            $this->refreshDeliveryReceiptBillingStatus($oldDeliveryReceiptId);
+            $this->refreshDeliveryReceiptBillingStatus((int) $invoice->delivery_receipt_id);
             app(AuditTrailService::class)->record(self::MODULE, 'updated', $invoice, $old, $invoice->load('items')->toArray(), 'Sales invoice updated: '.$invoice->sales_invoice_no);
 
             return $invoice->refresh();
@@ -185,6 +190,7 @@ class SalesInvoiceService
                 'status' => 'void',
                 'updated_by' => auth()->id(),
             ]);
+            $this->refreshDeliveryReceiptBillingStatus((int) $invoice->delivery_receipt_id);
             app(AuditTrailService::class)->record(self::MODULE, 'voided', $invoice, $old, $invoice->toArray(), 'Sales invoice voided: '.$invoice->sales_invoice_no);
 
             return $invoice->refresh();
@@ -307,11 +313,33 @@ class SalesInvoiceService
 
     private function ensureDeliveryReceiptIsCompleted(int $deliveryReceiptId): void
     {
-        $status = DeliveryReceipt::query()->whereKey($deliveryReceiptId)->value('status');
+        $receipt = DeliveryReceipt::query()
+            ->whereKey($deliveryReceiptId)
+            ->first(['id', 'status', 'remarks']);
 
-        if ($status !== 'completed') {
+        if (! $receipt || $receipt->remarks !== 'completed' || $receipt->status === 'cancelled') {
             throw new \RuntimeException('Only completed delivery receipts can be invoiced.');
         }
+    }
+
+    private function refreshDeliveryReceiptBillingStatus(int $deliveryReceiptId): void
+    {
+        if ($deliveryReceiptId <= 0) {
+            return;
+        }
+
+        $hasActiveInvoice = SalesInvoice::query()
+            ->where('delivery_receipt_id', $deliveryReceiptId)
+            ->where('status', '!=', 'void')
+            ->exists();
+
+        DeliveryReceipt::query()
+            ->whereKey($deliveryReceiptId)
+            ->where('status', '!=', 'cancelled')
+            ->update([
+                'status' => $hasActiveInvoice ? 'billed' : 'pending',
+                'updated_by' => auth()->id(),
+            ]);
     }
 
     private function applySourceTaxRate(array &$payload): void

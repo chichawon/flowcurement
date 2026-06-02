@@ -196,7 +196,7 @@ class DeliveryReceiptService
                 'received_date' => $payload['received_date'],
                 'received_by' => $payload['received_by'],
                 'delivered_by' => $payload['delivered_by'],
-                'status' => 'completed',
+                'remarks' => 'completed',
                 'updated_by' => auth()->id(),
             ]);
 
@@ -261,6 +261,7 @@ class DeliveryReceiptService
             'company_address' => $payload['company_address'] ?? null,
             'contact_person' => $payload['contact_person'] ?? null,
             'contact_no' => $payload['contact_no'] ?? null,
+            'remarks' => 'on_hold',
             'status' => 'pending',
         ];
     }

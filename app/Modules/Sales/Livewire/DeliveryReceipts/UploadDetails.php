@@ -117,7 +117,7 @@ class UploadDetails extends Component
             'received_date' => ['required', 'date'],
             'received_by' => ['required', 'string', 'max:255'],
             'delivered_by' => ['required', 'string', 'max:255'],
-            'attachments' => ['nullable', 'array'],
+            'attachments' => ['required', 'array', 'min:1'],
             'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
         ];
     }
@@ -128,6 +128,7 @@ class UploadDetails extends Component
             'received_date' => 'received date',
             'received_by' => 'received by',
             'delivered_by' => 'delivered by',
+            'attachments' => 'attachments',
             'attachments.*' => 'attachment',
         ];
     }

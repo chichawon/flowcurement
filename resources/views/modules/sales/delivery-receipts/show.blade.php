@@ -18,6 +18,7 @@
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Sales Order</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->sales_order_no }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Company</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->company_name }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Contact</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->contact_person }}{{ $deliveryReceipt->contact_no ? ' | '.$deliveryReceipt->contact_no : '' }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase text-slate-500">Remarks</dt><dd class="mt-1"><x-sales.status-badge :status="$deliveryReceipt->remarks ?? 'on_hold'" /></dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Received By</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->received_by ?: 'Not uploaded' }}</dd></div>
                 <div><dt class="text-xs font-semibold uppercase text-slate-500">Delivered By</dt><dd class="mt-1 text-sm text-slate-800">{{ $deliveryReceipt->delivered_by ?: 'Not uploaded' }}</dd></div>
             </dl>
@@ -125,6 +126,9 @@
 
     <div class="sticky bottom-0 mt-5 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-100/95 py-4 backdrop-blur">
         <a href="{{ route('sales.delivery-receipts.index') }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Back</a>
+        @can('print', $deliveryReceipt)
+            <a href="{{ route('sales.delivery-receipts.print', $deliveryReceipt) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
+        @endcan
         @can('update', $deliveryReceipt)
             <a href="{{ route('sales.delivery-receipts.edit', $deliveryReceipt) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800" hidden>Edit</a>
         @endcan

@@ -102,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         ->group(function (): void {
             Route::get('/', [DeliveryReceiptPageController::class, 'index'])->name('index');
             Route::get('/create', [DeliveryReceiptPageController::class, 'create'])->middleware('permission:delivery-receipts.create')->name('create');
+            Route::get('/{deliveryReceipt}/print', [DeliveryReceiptPageController::class, 'print'])->middleware('permission:delivery-receipts.print')->name('print');
             Route::get('/{deliveryReceipt}', [DeliveryReceiptPageController::class, 'show'])->name('show');
             Route::get('/{deliveryReceipt}/upload-details', [DeliveryReceiptPageController::class, 'uploadDetails'])->middleware('permission:delivery-receipts.update')->name('upload-details');
             Route::get('/{deliveryReceipt}/edit', [DeliveryReceiptPageController::class, 'edit'])->middleware('permission:delivery-receipts.update')->name('edit');
