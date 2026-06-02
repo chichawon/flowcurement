@@ -102,9 +102,10 @@
                                 type="button"
                                 @click="permTab = '{{ $tabName }}'"
                                 :class="permTab === '{{ $tabName }}' ? 'z-10 bg-cyan-600 text-white border-cyan-600 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 hover:text-slate-900'"
-                                class="relative -mb-px inline-flex h-9 items-center rounded-t-lg border px-4 text-xs font-semibold whitespace-nowrap transition"
+                                class="relative -mb-px inline-flex h-9 shrink-0 items-center justify-center rounded-t-lg border px-2 text-xs font-semibold whitespace-nowrap transition"
+                                style="width: 7.50rem; min-width: 7.50rem; max-width: 7.50rem;"
                             >
-                                {{ $tabName }}
+                                <span class="truncate">{{ $tabName }}</span>
                             </button>
                         @endforeach
                     </div>
