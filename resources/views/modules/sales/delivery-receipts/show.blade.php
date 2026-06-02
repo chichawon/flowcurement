@@ -24,6 +24,53 @@
         </section>
 
         <section class="erp-panel">
+            <div class="erp-panel-header"><h3 class="text-sm font-semibold text-slate-950">Invoice References</h3></div>
+            <div class="erp-panel-body">
+                <div class="overflow-x-auto rounded-md border border-slate-200">
+                    <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
+                        <colgroup>
+                            <col class="w-[24%]">
+                            <col class="w-[18%]">
+                            <col class="w-[18%]">
+                            <col class="w-[18%]">
+                            <col class="w-[22%]">
+                        </colgroup>
+                        <thead class="bg-slate-50 uppercase text-slate-500">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Invoice No</th>
+                                <th class="px-3 py-2 text-center">Invoice Date</th>
+                                <th class="px-3 py-2 text-right">Total Amount</th>
+                                <th class="px-3 py-2 text-right">Balance</th>
+                                <th class="px-3 py-2 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            @forelse ($deliveryReceipt->salesInvoices as $invoice)
+                                <tr>
+                                    <td class="px-3 py-2 font-semibold text-slate-900">
+                                        @if (auth()->user()?->can('sales-invoices.view'))
+                                            <a href="{{ route('sales.invoices.show', $invoice) }}" class="text-cyan-700 hover:text-cyan-800 hover:underline">{{ $invoice->sales_invoice_no }}</a>
+                                        @else
+                                            {{ $invoice->sales_invoice_no }}
+                                        @endif
+                                    </td>
+                                    <td class="px-3 py-2 text-center text-slate-700">{{ $invoice->invoice_date?->format('M d, Y') }}</td>
+                                    <td class="px-3 py-2 text-right font-semibold text-slate-900">{{ number_format((float) $invoice->total_amount, 2) }}</td>
+                                    <td class="px-3 py-2 text-right text-slate-700">{{ number_format((float) $invoice->balance_amount, 2) }}</td>
+                                    <td class="px-3 py-2 text-center"><x-sales.status-badge :status="$invoice->status" /></td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No invoice has been created from this delivery receipt yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="erp-panel">
             <div class="erp-panel-header"><h3 class="text-sm font-semibold text-slate-950">Delivered Items</h3></div>
             <div class="erp-panel-body">
                 <div class="overflow-x-auto rounded-md border border-slate-200">

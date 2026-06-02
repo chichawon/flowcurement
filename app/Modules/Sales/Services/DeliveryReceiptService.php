@@ -25,7 +25,12 @@ class DeliveryReceiptService
     public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         return DeliveryReceipt::query()
-            ->with(['salesOrder:id,sales_order_no', 'businessPartner:id,company_name', 'creator:id,name'])
+            ->with([
+                'salesOrder:id,sales_order_no',
+                'businessPartner:id,company_name',
+                'creator:id,name',
+                'salesInvoices:id,delivery_receipt_id,sales_invoice_no,status',
+            ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('delivery_receipt_no', 'like', "%{$search}%")

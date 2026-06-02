@@ -29,6 +29,7 @@ class DeliveryReceiptPageController extends Controller
                 'items.unitMeasure:id,name',
                 'items.salesOrderItem:id,description',
                 'attachments',
+                'salesInvoices:id,delivery_receipt_id,sales_invoice_no,invoice_date,total_amount,balance_amount,status',
                 'creator:id,name',
             ])
             ->find($deliveryReceipt);

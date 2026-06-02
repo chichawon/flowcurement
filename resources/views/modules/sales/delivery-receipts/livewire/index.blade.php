@@ -50,12 +50,13 @@
                 <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
                     <colgroup>
                         <col class="w-20">
-                        <col class="w-[20%]">
+                        <col class="w-[17%]">
+                        <col class="w-[13%]">
+                        <col class="w-[17%]">
+                        <col class="w-[13%]">
                         <col class="w-[16%]">
-                        <col class="w-[20%]">
-                        <col class="w-[16%]">
-                        <col class="w-[14%]">
-                        <col class="w-[14%]">
+                        <col class="w-[11%]">
+                        <col class="w-[13%]">
                     </colgroup>
                     <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                         <tr>
@@ -64,6 +65,7 @@
                             <th class="px-3 py-3 text-left">Sales Order</th>
                             <th class="px-3 py-3 text-left">Company</th>
                             <th class="px-3 py-3 text-left">Customer PO</th>
+                            <th class="px-3 py-3 text-left">Invoice Reference</th>
                             <th class="px-3 py-3 text-center">Date</th>
                             <th class="px-3 py-3 text-center">Status</th>
                         </tr>
@@ -97,11 +99,29 @@
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->sales_order_no }}</td>
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->company_name }}</td>
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->customer_po ?: 'None' }}</td>
+                                <td class="px-3 py-3 align-middle">
+                                    @if ($receipt->salesInvoices->isEmpty())
+                                        <span class="inline-flex rounded-full bg-slate-600 px-2.5 py-1 text-xs font-semibold text-white">No Invoice</span>
+                                    @else
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach ($receipt->salesInvoices->take(2) as $invoice)
+                                                @if (auth()->user()?->can('sales-invoices.view'))
+                                                    <a href="{{ route('sales.invoices.show', $invoice) }}" class="inline-flex rounded-full bg-cyan-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-cyan-700">{{ $invoice->sales_invoice_no }}</a>
+                                                @else
+                                                    <span class="inline-flex rounded-full bg-cyan-600 px-2.5 py-1 text-xs font-semibold text-white">{{ $invoice->sales_invoice_no }}</span>
+                                                @endif
+                                            @endforeach
+                                            @if ($receipt->salesInvoices->count() > 2)
+                                                <span class="inline-flex rounded-full bg-slate-700 px-2.5 py-1 text-xs font-semibold text-white">+{{ $receipt->salesInvoices->count() - 2 }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-3 text-center align-middle text-slate-700">{{ $receipt->dr_date?->format('M d, Y') }}</td>
                                 <td class="px-3 py-3 text-center align-middle"><x-sales.status-badge :status="$receipt->status" /></td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="px-4 py-10 text-center text-sm text-slate-500">No delivery receipts found.</td></tr>
+                            <tr><td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">No delivery receipts found.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

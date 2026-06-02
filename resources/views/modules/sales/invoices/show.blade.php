@@ -107,19 +107,41 @@
             </div>
         </section>
 
-        <div class="flex items-center justify-end gap-2">
-            <a href="{{ route('sales.invoices.index') }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back</a>
-            @can('print', $salesInvoice)
-                <a href="{{ route('sales.invoices.print', $salesInvoice) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
-            @endcan
+        <div x-data="{ issueModalOpen: false }">
+            <div class="flex items-center justify-end gap-2">
+                <a href="{{ route('sales.invoices.index') }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back</a>
+                @can('print', $salesInvoice)
+                    <a href="{{ route('sales.invoices.print', $salesInvoice) }}" target="_blank" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Print</a>
+                @endcan
+                @can('issue', $salesInvoice)
+                    <button type="button" @click="issueModalOpen = true" class="rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
+                @endcan
+                @can('update', $salesInvoice)
+                    <a href="{{ route('sales.invoices.edit', $salesInvoice) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
+                @endcan
+            </div>
+
             @can('issue', $salesInvoice)
-                <form method="POST" action="{{ route('sales.invoices.issue', $salesInvoice) }}" onsubmit="return confirm('Issue this sales invoice? Once issued, it will be locked for billing.');">
-                    @csrf
-                    <button type="submit" class="rounded-md bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
-                </form>
-            @endcan
-            @can('update', $salesInvoice)
-                <a href="{{ route('sales.invoices.edit', $salesInvoice) }}" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">Edit</a>
+                <div x-show="issueModalOpen" x-transition.opacity x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0" role="dialog" aria-modal="true">
+                    <div class="absolute inset-0 bg-slate-950/60" @click="issueModalOpen = false"></div>
+                    <div class="relative w-full max-w-sm rounded-xl bg-white shadow-2xl">
+                        <div class="border-b border-slate-200 px-5 py-4">
+                            <h3 class="text-base font-semibold text-slate-950">Issue sales invoice?</h3>
+                            <p class="mt-1 text-sm text-slate-500">This will mark the invoice as official billing and lock item edits.</p>
+                        </div>
+                        <div class="px-5 py-4">
+                            <p class="text-sm text-slate-600">Issue:</p>
+                            <p class="mt-1 text-sm font-semibold text-slate-950">{{ $salesInvoice->sales_invoice_no }}</p>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
+                            <button type="button" @click="issueModalOpen = false" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                            <form method="POST" action="{{ route('sales.invoices.issue', $salesInvoice) }}">
+                                @csrf
+                                <button type="submit" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Issue</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @endcan
         </div>
     </div>
