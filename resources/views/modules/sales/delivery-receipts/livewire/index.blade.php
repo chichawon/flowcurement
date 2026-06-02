@@ -50,23 +50,23 @@
                 <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
                     <colgroup>
                         <col class="w-20">
-                        <col class="w-[17%]">
-                        <col class="w-[13%]">
-                        <col class="w-[17%]">
-                        <col class="w-[13%]">
+                        <col class="w-[14%]">
+                        <col class="w-[12%]">
+                        <col class="w-[14%]">
                         <col class="w-[16%]">
-                        <col class="w-[11%]">
+                        <col class="w-[13%]">
+                        <col class="w-[18%]">
                         <col class="w-[13%]">
                     </colgroup>
                     <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                         <tr>
                             <th class="px-3 py-3 text-center">Action</th>
-                            <th class="px-3 py-3 text-left">Delivery Receipt No</th>
-                            <th class="px-3 py-3 text-left">Sales Order</th>
+                            <th class="px-3 py-3 text-left">D.R No.</th>
+                            <th class="px-3 py-3 text-center">D.R Date</th>
+                            <th class="px-3 py-3 text-left">Sales Order No.</th>
                             <th class="px-3 py-3 text-left">Company</th>
-                            <th class="px-3 py-3 text-left">Customer PO</th>
+                            <th class="px-3 py-3 text-left">Customer P.O</th>
                             <th class="px-3 py-3 text-left">Invoice Reference</th>
-                            <th class="px-3 py-3 text-center">Date</th>
                             <th class="px-3 py-3 text-center">Status</th>
                         </tr>
                     </thead>
@@ -96,6 +96,7 @@
                                 <td class="px-3 py-3 align-middle">
                                     <p class="truncate font-semibold text-slate-900">{{ $receipt->delivery_receipt_no }}</p>
                                 </td>
+                                <td class="px-3 py-3 text-center align-middle text-slate-700">{{ $receipt->dr_date?->format('M d, Y') }}</td>
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->sales_order_no }}</td>
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->company_name }}</td>
                                 <td class="px-3 py-3 align-middle text-slate-700">{{ $receipt->customer_po ?: 'None' }}</td>
@@ -117,7 +118,6 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-3 py-3 text-center align-middle text-slate-700">{{ $receipt->dr_date?->format('M d, Y') }}</td>
                                 <td class="px-3 py-3 text-center align-middle"><x-sales.status-badge :status="$receipt->status" /></td>
                             </tr>
                         @empty
