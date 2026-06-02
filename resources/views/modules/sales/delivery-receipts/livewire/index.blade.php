@@ -84,16 +84,16 @@
                                         </x-slot>
                                         <x-slot name="content">
                                             @can('view', $receipt)
-                                                <a href="{{ route('sales.delivery-receipts.show', $receipt) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
+                                                <a href="{{ route('sales.delivery-receipts.show', $receipt) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="view" /> View</a>
                                             @endcan
                                             @can('update', $receipt)
-                                                <button type="button" wire:click="openUploadDetails({{ $receipt->id }})" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Upload Details</button>
+                                                <button type="button" wire:click="openUploadDetails({{ $receipt->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="upload" /> Upload Details</button>
                                             @endcan
                                             @can('print', $receipt)
-                                                <a href="{{ route('sales.delivery-receipts.print', $receipt) }}" target="_blank" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Print</a>
+                                                <a href="{{ route('sales.delivery-receipts.print', $receipt) }}" target="_blank" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="print" /> Print</a>
                                             @endcan
                                             @can('cancel', $receipt)
-                                                <button type="button" wire:click="promptVoidReceipt({{ $receipt->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Void</button>
+                                                <button type="button" wire:click="promptVoidReceipt({{ $receipt->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="cancel" /> Void</button>
                                             @endcan
                                         </x-slot>
                                     </x-dropdown>

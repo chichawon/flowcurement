@@ -91,16 +91,16 @@
 
                                         <x-slot name="content">
                                             @can('view', $quotation)
-                                                <a href="{{ route('quotations.show', $quotation) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
+                                                <a href="{{ route('quotations.show', $quotation) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="view" /> View</a>
                                             @endcan
                                             @can('print', $quotation)
-                                                <a href="{{ route('quotations.print', $quotation) }}" target="_blank" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Print</a>
+                                                <a href="{{ route('quotations.print', $quotation) }}" target="_blank" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="print" /> Print</a>
                                             @endcan
                                             @can('update', $quotation)
-                                                <a href="{{ route('quotations.edit', $quotation) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
+                                                <a href="{{ route('quotations.edit', $quotation) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="edit" /> Edit</a>
                                             @endcan
                                             @can('delete', $quotation)
-                                                <button type="button" wire:click="promptDeleteQuotation({{ $quotation->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Delete</button>
+                                                <button type="button" wire:click="promptDeleteQuotation({{ $quotation->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="delete" /> Delete</button>
                                             @endcan
                                         </x-slot>
                                     </x-dropdown>

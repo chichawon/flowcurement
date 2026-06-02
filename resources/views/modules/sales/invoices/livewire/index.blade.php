@@ -90,16 +90,16 @@
                                         </x-slot>
                                         <x-slot name="content">
                                             @can('view', $invoice)
-                                                <a href="{{ route('sales.invoices.show', $invoice) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
+                                                <a href="{{ route('sales.invoices.show', $invoice) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="view" /> View</a>
                                             @endcan
                                             @can('update', $invoice)
-                                                <a href="{{ route('sales.invoices.edit', $invoice) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
+                                                <a href="{{ route('sales.invoices.edit', $invoice) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="edit" /> Edit</a>
                                             @endcan
                                             @can('print', $invoice)
-                                                <a href="{{ route('sales.invoices.print', $invoice) }}" target="_blank" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Print</a>
+                                                <a href="{{ route('sales.invoices.print', $invoice) }}" target="_blank" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="print" /> Print</a>
                                             @endcan
                                             @can('delete', $invoice)
-                                                <button type="button" wire:click="promptVoidInvoice({{ $invoice->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Cancel</button>
+                                                <button type="button" wire:click="promptVoidInvoice({{ $invoice->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="cancel" /> Cancel</button>
                                             @endcan
                                         </x-slot>
                                     </x-dropdown>

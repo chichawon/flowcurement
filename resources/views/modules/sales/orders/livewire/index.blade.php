@@ -157,16 +157,16 @@
 
                                         <x-slot name="content">
                                             @can('view', $salesOrder)
-                                                <a href="{{ route('sales.orders.show', $salesOrder) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
+                                                <a href="{{ route('sales.orders.show', $salesOrder) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="view" /> View</a>
                                             @endcan
                                             <!-- @can('print', $salesOrder)
-                                                <button type="button" class="block w-full px-4 py-2 text-start text-sm text-slate-400">Print</button>
+                                                <button type="button" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-400"><x-action-icon name="print" /> Print</button>
                                             @endcan -->
                                             @can('update', $salesOrder)
-                                                <a href="{{ route('sales.orders.edit', $salesOrder) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
+                                                <a href="{{ route('sales.orders.edit', $salesOrder) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="edit" /> Edit</a>
                                             @endcan
                                             @can('delete', $salesOrder)
-                                                <button type="button" wire:click="promptDeleteSalesOrder({{ $salesOrder->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Delete</button>
+                                                <button type="button" wire:click="promptDeleteSalesOrder({{ $salesOrder->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="delete" /> Delete</button>
                                             @endcan
                                         </x-slot>
                                     </x-dropdown>

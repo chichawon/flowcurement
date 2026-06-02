@@ -112,20 +112,20 @@
                                         <x-slot name="content">
                                             @if ($partner->trashed())
                                                 @can('restore', $partner)
-                                                    <button type="button" wire:click="restorePartner({{ $partner->id }})" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Restore</button>
+                                                    <button type="button" wire:click="restorePartner({{ $partner->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="restore" /> Restore</button>
                                                 @endcan
                                                 @can('forceDelete', $partner)
-                                                    <button type="button" wire:click="promptForceDeletePartner({{ $partner->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Delete Forever</button>
+                                                    <button type="button" wire:click="promptForceDeletePartner({{ $partner->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="delete" /> Delete Forever</button>
                                                 @endcan
                                             @else
                                                 @can('view', $partner)
-                                                    <a href="{{ route($routePrefix.'.show', $partner) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">View</a>
+                                                    <a href="{{ route($routePrefix.'.show', $partner) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="view" /> View</a>
                                                 @endcan
                                                 @can('update', $partner)
-                                                    <a href="{{ route($routePrefix.'.edit', $partner) }}" class="block w-full px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100">Edit</a>
+                                                    <a href="{{ route($routePrefix.'.edit', $partner) }}" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-slate-700 hover:bg-slate-100"><x-action-icon name="edit" /> Edit</a>
                                                 @endcan
                                                 @can('delete', $partner)
-                                                    <button type="button" wire:click="promptDeletePartner({{ $partner->id }})" class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50">Delete</button>
+                                                    <button type="button" wire:click="promptDeletePartner({{ $partner->id }})" class="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-700 hover:bg-red-50"><x-action-icon name="delete" /> Delete</button>
                                                 @endcan
                                             @endif
                                         </x-slot>
