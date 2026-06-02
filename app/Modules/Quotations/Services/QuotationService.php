@@ -45,16 +45,16 @@ class QuotationService
 
     public function nextQuotationNo(): string
     {
-        $year = now()->format('Y');
+        $prefix = 'Q'.now()->format('y-m');
         $last = Quotation::query()
-            ->where('quotation_no', 'like', "QT-{$year}-%")
+            ->where('quotation_no', 'like', "{$prefix}-%")
             ->lockForUpdate()
             ->orderByDesc('id')
             ->value('quotation_no');
 
         $next = $last ? ((int) str($last)->afterLast('-')->value()) + 1 : 1;
 
-        return 'QT-'.$year.'-'.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
+        return $prefix.'-'.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
     }
 
     public function totals(array $items, float|int|string $taxRate): array
