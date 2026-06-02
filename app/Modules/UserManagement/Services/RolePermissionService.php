@@ -63,10 +63,15 @@ class RolePermissionService
      */
     public function roles(): Collection
     {
+        $roleOrder = ['administrator', 'manager', 'sales', 'purchasing', 'inventory', 'encoder'];
+
         return Role::query()
             ->with('permissions:id,name')
-            ->orderBy('name')
-            ->get();
+            ->get()
+            ->sortBy(fn (Role $role) => array_search($role->name, $roleOrder, true) === false
+                ? count($roleOrder)
+                : array_search($role->name, $roleOrder, true))
+            ->values();
     }
 
     /**

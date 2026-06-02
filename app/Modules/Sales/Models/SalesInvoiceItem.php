@@ -6,46 +6,57 @@ use App\Modules\Items\Models\Item;
 use App\Modules\Quotations\Models\UnitMeasure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DeliveryReceiptItem extends Model
+class SalesInvoiceItem extends Model
 {
     protected $fillable = [
+        'sales_invoice_id',
         'delivery_receipt_id',
+        'delivery_receipt_item_id',
         'sales_order_item_id',
         'item_id',
         'item_name',
-        'ordered_quantity',
-        'previously_delivered_quantity',
-        'remaining_balance_quantity',
-        'available_stock',
-        'delivered_quantity',
-        'balance_quantity',
+        'description',
         'unit_measure_id',
-        'stock_status',
-        'delivery_no',
-        'delivered_date',
-        'delivered_by',
-        'received_by',
-        'remarks',
+        'delivered_quantity',
+        'previously_invoiced_quantity',
+        'invoiceable_quantity',
+        'quantity',
+        'price',
+        'subtotal',
+        'tax_rate',
+        'tax_amount',
+        'total',
     ];
 
     protected function casts(): array
     {
         return [
-            'ordered_quantity' => 'decimal:2',
-            'previously_delivered_quantity' => 'decimal:2',
-            'remaining_balance_quantity' => 'decimal:2',
-            'available_stock' => 'decimal:2',
             'delivered_quantity' => 'decimal:2',
-            'balance_quantity' => 'decimal:2',
-            'delivered_date' => 'date',
+            'previously_invoiced_quantity' => 'decimal:2',
+            'invoiceable_quantity' => 'decimal:2',
+            'quantity' => 'decimal:2',
+            'price' => 'decimal:2',
+            'subtotal' => 'decimal:2',
+            'tax_rate' => 'decimal:2',
+            'tax_amount' => 'decimal:2',
+            'total' => 'decimal:2',
         ];
+    }
+
+    public function salesInvoice(): BelongsTo
+    {
+        return $this->belongsTo(SalesInvoice::class);
     }
 
     public function deliveryReceipt(): BelongsTo
     {
         return $this->belongsTo(DeliveryReceipt::class);
+    }
+
+    public function deliveryReceiptItem(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryReceiptItem::class);
     }
 
     public function salesOrderItem(): BelongsTo
@@ -61,10 +72,5 @@ class DeliveryReceiptItem extends Model
     public function unitMeasure(): BelongsTo
     {
         return $this->belongsTo(UnitMeasure::class);
-    }
-
-    public function salesInvoiceItems(): HasMany
-    {
-        return $this->hasMany(SalesInvoiceItem::class);
     }
 }

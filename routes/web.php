@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationPageController;
+use App\Http\Controllers\SalesInvoicePageController;
 use App\Http\Controllers\SalesOrderPageController;
 use App\Modules\UserManagement\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -104,6 +105,16 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/{deliveryReceipt}', [DeliveryReceiptPageController::class, 'show'])->name('show');
             Route::get('/{deliveryReceipt}/upload-details', [DeliveryReceiptPageController::class, 'uploadDetails'])->middleware('permission:delivery-receipts.update')->name('upload-details');
             Route::get('/{deliveryReceipt}/edit', [DeliveryReceiptPageController::class, 'edit'])->middleware('permission:delivery-receipts.update')->name('edit');
+        });
+
+    Route::prefix('sales/invoices')
+        ->name('sales.invoices.')
+        ->middleware(['permission:sales-invoices.view'])
+        ->group(function (): void {
+            Route::get('/', [SalesInvoicePageController::class, 'index'])->name('index');
+            Route::get('/create', [SalesInvoicePageController::class, 'create'])->middleware('permission:sales-invoices.create')->name('create');
+            Route::get('/{salesInvoice}', [SalesInvoicePageController::class, 'show'])->name('show');
+            Route::get('/{salesInvoice}/edit', [SalesInvoicePageController::class, 'edit'])->middleware('permission:sales-invoices.update')->name('edit');
         });
 });
 

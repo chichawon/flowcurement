@@ -15,7 +15,16 @@ class AdminRoleSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $roles = ['admin', 'sales', 'purchasing', 'inventory', 'manager'];
+        $legacyAdminRole = Role::query()
+            ->where('name', 'admin')
+            ->where('guard_name', 'web')
+            ->first();
+
+        if ($legacyAdminRole && ! Role::query()->where('name', 'administrator')->where('guard_name', 'web')->exists()) {
+            $legacyAdminRole->update(['name' => 'administrator']);
+        }
+
+        $roles = ['administrator', 'manager', 'sales', 'purchasing', 'inventory', 'encoder'];
 
         foreach ($roles as $roleName) {
             Role::firstOrCreate([
@@ -41,7 +50,7 @@ class AdminRoleSeeder extends Seeder
             'delivery-receipts.print',
         ];
 
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'web')->firstOrFail();
+        $adminRole = Role::where('name', 'administrator')->where('guard_name', 'web')->firstOrFail();
         $adminRole->syncPermissions(Permission::all());
 
         $managerRole = Role::where('name', 'manager')->where('guard_name', 'web')->first();
@@ -69,6 +78,11 @@ class AdminRoleSeeder extends Seeder
             'delivery-receipts.update',
             'delivery-receipts.cancel',
             'delivery-receipts.print',
+            'sales-invoices.view',
+            'sales-invoices.create',
+            'sales-invoices.update',
+            'sales-invoices.delete',
+            'sales-invoices.print',
             'business-partners.view',
             'business-partners.create',
             'business-partners.update',
@@ -95,6 +109,11 @@ class AdminRoleSeeder extends Seeder
             'items.update',
         ])->get());
 
+        $encoderRole = Role::where('name', 'encoder')->where('guard_name', 'web')->first();
+        $encoderRole?->syncPermissions(Permission::whereIn('name', [
+            'dashboard.view',
+        ])->get());
+
         $admin = User::query()
             ->where('username', 'admin')
             ->orWhere('email', 'admin@flowcurement.test')
@@ -119,7 +138,7 @@ class AdminRoleSeeder extends Seeder
             ])->save();
         }
 
-        if (! $admin->hasRole('admin')) {
+        if (! $admin->hasRole('administrator')) {
             $admin->assignRole($adminRole);
         }
     }

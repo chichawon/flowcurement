@@ -35,9 +35,14 @@ use App\Modules\Sales\Livewire\DeliveryReceipts\Create as DeliveryReceiptCreate;
 use App\Modules\Sales\Livewire\DeliveryReceipts\Edit as DeliveryReceiptEdit;
 use App\Modules\Sales\Livewire\DeliveryReceipts\Index as DeliveryReceiptIndex;
 use App\Modules\Sales\Livewire\DeliveryReceipts\UploadDetails as DeliveryReceiptUploadDetails;
+use App\Modules\Sales\Livewire\Invoices\Create as SalesInvoiceCreate;
+use App\Modules\Sales\Livewire\Invoices\Edit as SalesInvoiceEdit;
+use App\Modules\Sales\Livewire\Invoices\Index as SalesInvoiceIndex;
 use App\Modules\Sales\Models\DeliveryReceipt;
+use App\Modules\Sales\Models\SalesInvoice;
 use App\Modules\Sales\Models\SalesOrder;
 use App\Modules\Sales\Policies\DeliveryReceiptPolicy;
+use App\Modules\Sales\Policies\SalesInvoicePolicy;
 use App\Modules\Sales\Policies\SalesOrderPolicy;
 use App\Modules\UserManagement\Livewire\UsersIndex;
 use App\Modules\UserManagement\Policies\UserPolicy;
@@ -71,6 +76,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Quotation::class, QuotationPolicy::class);
         Gate::policy(SalesOrder::class, SalesOrderPolicy::class);
         Gate::policy(DeliveryReceipt::class, DeliveryReceiptPolicy::class);
+        Gate::policy(SalesInvoice::class, SalesInvoicePolicy::class);
 
         Livewire::component('business-partners.client-index', ClientIndex::class);
         Livewire::component('business-partners.client-create', ClientCreate::class);
@@ -97,6 +103,9 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('sales.delivery-receipts.create', DeliveryReceiptCreate::class);
         Livewire::component('sales.delivery-receipts.edit', DeliveryReceiptEdit::class);
         Livewire::component('sales.delivery-receipts.upload-details', DeliveryReceiptUploadDetails::class);
+        Livewire::component('sales.invoices.index', SalesInvoiceIndex::class);
+        Livewire::component('sales.invoices.create', SalesInvoiceCreate::class);
+        Livewire::component('sales.invoices.edit', SalesInvoiceEdit::class);
         Livewire::component('user-management.users-index', UsersIndex::class);
 
         $this->app->booted(function (): void {

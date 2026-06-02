@@ -53,4 +53,9 @@ class SalesOrderItem extends Model
     {
         return $this->hasMany(DeliveryReceiptItem::class);
     }
+
+    public function salesInvoiceItems(): HasMany
+    {
+        return $this->hasMany(SalesInvoiceItem::class);
+    }
 }

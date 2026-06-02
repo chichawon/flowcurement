@@ -63,6 +63,11 @@ class DeliveryReceipt extends Model
         return $this->hasMany(DeliveryReceiptAttachment::class);
     }
 
+    public function salesInvoices(): HasMany
+    {
+        return $this->hasMany(SalesInvoice::class);
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
