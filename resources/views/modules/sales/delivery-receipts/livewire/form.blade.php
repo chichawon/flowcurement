@@ -7,23 +7,111 @@
             <div class="grid gap-3 lg:grid-cols-4">
                 <label class="block">
                     <span class="text-sm font-medium text-slate-700">Delivery Receipt No.</span>
-                    <input type="text" value="{{ $delivery_receipt_no }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-950 shadow-sm">
+                    <input type="text" wire:model.blur="delivery_receipt_no" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm font-semibold text-slate-950 shadow-sm erp-focus-ring" @disabled($deliveryReceiptRecord !== null)>
+                    @error('delivery_receipt_no') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                 </label>
                 <label class="block">
                     <span class="text-sm font-medium text-slate-700">DR Date</span>
                     <input type="date" wire:model.live="dr_date" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring">
                     @error('dr_date') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                 </label>
-                <label class="block lg:col-span-2">
+                @php
+                    $salesOrderOptions = $salesOrders->map(fn ($so): array => [
+                        'id' => (string) $so->id,
+                        'sales_order_no' => (string) $so->sales_order_no,
+                        'company' => (string) ($so->businessPartner?->company_name ?? 'No company'),
+                        'customer_po' => (string) ($so->customer_po ?: 'No P.O.'),
+                        'label' => trim(($so->customer_po ?: 'No P.O.').' - '.($so->businessPartner?->company_name ?? 'No company')),
+                        'search' => strtolower(trim($so->sales_order_no.' '.($so->businessPartner?->company_name ?? '').' '.($so->customer_po ?? ''))),
+                    ])->values();
+                    $selectedSalesOrderLabel = $sales_order_no
+                        ? trim(($customer_po ?: 'No P.O.').' - '.($company_name ?: 'No company'))
+                        : 'Select sales order';
+                @endphp
+                <div
+                    class="block lg:col-span-2"
+                    wire:ignore.self
+                    x-data="{
+                        open: false,
+                        search: '',
+                        selected: @js((string) $sales_order_id),
+                        disabled: @js($deliveryReceiptRecord !== null),
+                        fallbackLabel: @js($selectedSalesOrderLabel),
+                        options: @js($salesOrderOptions),
+                        get selectedOption() {
+                            return this.options.find((option) => String(option.id) === String(this.selected));
+                        },
+                        get selectedLabel() {
+                            return this.selectedOption ? this.selectedOption.label : this.fallbackLabel;
+                        },
+                        get filteredOptions() {
+                            const term = this.search.trim().toLowerCase();
+                            if (! term) {
+                                return this.options;
+                            }
+
+                            return this.options.filter((option) => option.search.includes(term));
+                        },
+                        choose(option) {
+                            if (this.disabled) {
+                                return;
+                            }
+
+                            this.selected = String(option.id);
+                            this.open = false;
+                            this.search = '';
+                        },
+                    }"
+                    @click.away="open = false"
+                >
                     <span class="text-sm font-medium text-slate-700">Sales Order</span>
-                    <select wire:model.live="sales_order_id" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring" @disabled($deliveryReceiptRecord !== null)>
-                        <option value="">Select sales order</option>
-                        @foreach ($salesOrders as $so)
-                            <option value="{{ $so->id }}">{{ $so->sales_order_no }} - {{ $so->businessPartner?->company_name }}</option>
-                        @endforeach
-                    </select>
+                    <div class="relative mt-1">
+                        <button
+                            type="button"
+                            class="flex h-10 w-full items-center justify-between gap-3 rounded-md border border-slate-300 bg-white px-3 text-left text-sm shadow-sm erp-focus-ring disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                            @click="if (! disabled) { open = ! open; $nextTick(() => $refs.salesOrderSearch?.focus()); }"
+                            :disabled="disabled"
+                        >
+                            <span class="min-w-0" :class="selected ? 'text-slate-950' : 'text-slate-500'">
+                                <span class="block truncate" x-text="selectedLabel"></span>
+                                <span x-show="selectedOption" class="block truncate text-xs font-medium text-slate-500" x-text="selectedOption?.sales_order_no"></span>
+                            </span>
+                            <svg class="size-4 shrink-0 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak class="absolute z-40 mt-1 w-full overflow-hidden rounded-md border border-slate-300 bg-white shadow-lg">
+                            <div class="border-b border-slate-200 p-2">
+                                <input
+                                    x-ref="salesOrderSearch"
+                                    type="search"
+                                    x-model="search"
+                                    class="block h-9 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring"
+                                    placeholder="Search sales order, company, or P.O."
+                                >
+                            </div>
+                            <div class="max-h-64 overflow-y-auto py-1">
+                                <template x-for="option in filteredOptions" :key="option.id">
+                                    <button
+                                        type="button"
+                                        class="flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm hover:bg-cyan-50"
+                                        :class="String(option.id) === String(selected) ? 'bg-cyan-50 text-cyan-900' : 'text-slate-800'"
+                                        @click="choose(option); $wire.set('sales_order_id', String(option.id))"
+                                    >
+                                        <span class="font-semibold" x-text="`${option.customer_po} - ${option.company}`"></span>
+                                        <span class="text-xs text-slate-500" x-text="option.sales_order_no"></span>
+                                    </button>
+                                </template>
+
+                                <div x-show="filteredOptions.length === 0" class="px-3 py-4 text-center text-sm text-slate-500">
+                                    No sales orders found.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     @error('sales_order_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
-                </label>
+                </div>
             </div>
 
             <div class="grid gap-3 lg:grid-cols-4">
@@ -92,5 +180,31 @@
     <div class="sticky bottom-0 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-100/95 py-4 backdrop-blur">
         <a href="{{ $cancelRoute }}" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</a>
         <button type="submit" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">{{ $submitLabel }}</button>
+    </div>
+
+    <div
+        x-data="{ open: @entangle('showDuplicateDeliveryReceiptNoModal').live }"
+        x-show="open"
+        x-transition.opacity
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div class="absolute inset-0 bg-slate-950/60" @click="$wire.closeDuplicateDeliveryReceiptNoModal()"></div>
+
+        <div class="relative w-full max-w-sm rounded-xl bg-white shadow-2xl">
+            <div class="border-b border-slate-200 px-5 py-4">
+                <h3 class="text-base font-semibold text-slate-950">Existing D.R number</h3>
+                <p class="mt-1 text-sm text-slate-500">Please use another Delivery Receipt number.</p>
+            </div>
+            <div class="px-5 py-4">
+                <p class="text-sm text-slate-600">This D.R number already exists:</p>
+                <p class="mt-1 text-sm font-semibold text-red-700">{{ $duplicateDeliveryReceiptNo }}</p>
+            </div>
+            <div class="flex items-center justify-end border-t border-slate-200 px-5 py-4">
+                <button type="button" wire:click="closeDuplicateDeliveryReceiptNoModal" class="rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800">Okay</button>
+            </div>
+        </div>
     </div>
 </form>

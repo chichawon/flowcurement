@@ -244,6 +244,11 @@
         </tbody>
     </table>
 
+    @php
+        $summaryTotalInvoiceAmount = round((float) $salesInvoice->subtotal + (float) $salesInvoice->tax_amount, 2);
+        $summaryBalanceAmount = round($summaryTotalInvoiceAmount - (float) $salesInvoice->withholding_tax_amount, 2);
+    @endphp
+
     <table class="summary">
         <tr>
             <td style="width: 72%; font-weight: 700;">Subtotal</td>
@@ -254,12 +259,20 @@
             <td class="right" style="font-weight: 700;">{{ number_format((float) $salesInvoice->tax_amount, 2) }}</td>
         </tr>
         <tr>
-            <td style="font-weight: 700;">WHT Amount</td>
-            <td class="right" style="font-weight: 700;">-{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
+            <td style="font-weight: 700;">Total Invoice Amount</td>
+            <td class="right" style="font-weight: 700;">{{ number_format($summaryTotalInvoiceAmount, 2) }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 700;">Withholding Tax</td>
+            <td class="right" style="font-weight: 700;">{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: 700;">Balance</td>
+            <td class="right" style="font-weight: 700;">{{ number_format($summaryBalanceAmount, 2) }}</td>
         </tr>
         <tr class="grand-total">
             <td>Total Amount</td>
-            <td class="right">{{ number_format((float) $salesInvoice->total_amount, 2) }}</td>
+            <td class="right">{{ number_format($summaryBalanceAmount, 2) }}</td>
         </tr>
     </table>
 

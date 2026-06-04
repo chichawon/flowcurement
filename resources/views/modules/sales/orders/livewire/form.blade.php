@@ -21,7 +21,7 @@
                 </label>
                 <label class="block">
                     <span class="text-sm font-medium text-slate-700">No. of Days</span>
-                    <input type="number" wire:model.live="no_of_days" min="0" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                    <input type="number" wire:model.live="no_of_days" min="0" max="{{ \App\Modules\Sales\Services\SalesOrderService::MAX_NO_OF_DAYS }}" step="1" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
                     @error('no_of_days') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                 </label>
                 <label class="block">

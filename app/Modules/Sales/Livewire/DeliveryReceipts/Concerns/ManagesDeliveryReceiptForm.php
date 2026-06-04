@@ -27,6 +27,8 @@ trait ManagesDeliveryReceiptForm
     public string $status = 'pending';
     public array $items = [];
     public ?string $notice = null;
+    public bool $showDuplicateDeliveryReceiptNoModal = false;
+    public string $duplicateDeliveryReceiptNo = '';
 
     protected function formRules(): array
     {
@@ -111,6 +113,25 @@ trait ManagesDeliveryReceiptForm
         $this->notice = $hasAnyDeliverable ? null : 'All items in this Sales Order have no available stocks.';
     }
 
+    public function updatedDeliveryReceiptNo(): void
+    {
+        $this->delivery_receipt_no = strtoupper(trim($this->delivery_receipt_no));
+
+        if ($this->deliveryReceiptNoExists()) {
+            $this->showDuplicateDeliveryReceiptNoModal = true;
+            $this->duplicateDeliveryReceiptNo = $this->delivery_receipt_no;
+            $this->addError('delivery_receipt_no', 'Delivery Receipt number already exists.');
+            return;
+        }
+
+        $this->resetErrorBag('delivery_receipt_no');
+    }
+
+    public function closeDuplicateDeliveryReceiptNoModal(): void
+    {
+        $this->showDuplicateDeliveryReceiptNoModal = false;
+    }
+
     public function updatedItems($value, ?string $key = null): void
     {
         if ($key === null) {
@@ -133,6 +154,15 @@ trait ManagesDeliveryReceiptForm
 
     public function save(): mixed
     {
+        $this->delivery_receipt_no = strtoupper(trim($this->delivery_receipt_no));
+
+        if ($this->deliveryReceiptNoExists()) {
+            $this->showDuplicateDeliveryReceiptNoModal = true;
+            $this->duplicateDeliveryReceiptNo = $this->delivery_receipt_no;
+            $this->addError('delivery_receipt_no', 'Delivery Receipt number already exists.');
+            return null;
+        }
+
         $payload = $this->validate($this->formRules());
         $payload['sales_order_no'] = $this->sales_order_no;
         $payload['customer_po'] = $this->customer_po;
@@ -158,5 +188,18 @@ trait ManagesDeliveryReceiptForm
         }
 
         return redirect()->route('sales.delivery-receipts.index')->with('toast', 'Delivery receipt created successfully.');
+    }
+
+    private function deliveryReceiptNoExists(): bool
+    {
+        if ($this->delivery_receipt_no === '') {
+            return false;
+        }
+
+        return DeliveryReceipt::query()
+            ->withTrashed()
+            ->where('delivery_receipt_no', $this->delivery_receipt_no)
+            ->when($this->deliveryReceiptRecord, fn ($query) => $query->whereKeyNot($this->deliveryReceiptRecord->id))
+            ->exists();
     }
 }

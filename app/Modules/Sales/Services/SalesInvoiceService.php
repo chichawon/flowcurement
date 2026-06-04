@@ -211,14 +211,15 @@ class SalesInvoiceService
 
             return round($withholdingBase * ((float) ($row['withholding_tax_rate'] ?? 0) / 100), 2);
         });
-        $total = round($subtotal + $taxAmount - $withholdingTaxAmount, 2);
+        $total = round($subtotal + $taxAmount, 2);
+        $balance = round($total - $withholdingTaxAmount, 2);
 
         return [
             'subtotal' => round($subtotal, 2),
             'tax_amount' => $taxAmount,
             'withholding_tax_amount' => $withholdingTaxAmount,
             'total_amount' => $total,
-            'balance_amount' => $total,
+            'balance_amount' => $balance,
         ];
     }
 
@@ -303,7 +304,7 @@ class SalesInvoiceService
                 'tax_amount' => $taxAmount,
                 'withholding_tax_rate' => $withholdingTaxRate,
                 'withholding_tax_amount' => $withholdingTaxAmount,
-                'total' => round($grossTotal - $withholdingTaxAmount, 2),
+                'total' => $grossTotal,
             ]);
             $saved++;
         }

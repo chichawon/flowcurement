@@ -3,6 +3,7 @@
 namespace App\Modules\Sales\Requests;
 
 use App\Modules\Sales\Helpers\SalesOrderOptions;
+use App\Modules\Sales\Services\SalesOrderService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class StoreSalesOrderRequest extends FormRequest
         return [
             'sales_order_no' => ['required', 'string', 'max:50', Rule::unique('sales_orders', 'sales_order_no')->ignore($salesOrderId)],
             'order_date' => ['required', 'date'],
-            'no_of_days' => ['required', 'integer', 'min:0'],
+            'no_of_days' => ['required', 'integer', 'min:0', 'max:'.SalesOrderService::MAX_NO_OF_DAYS],
             'delivery_date' => ['required', 'date', 'after_or_equal:order_date'],
             'customer_po' => ['nullable', 'string', 'max:255'],
             'agent_name' => ['required', 'string', 'max:255'],

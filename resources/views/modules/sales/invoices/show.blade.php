@@ -105,6 +105,10 @@
         <section class="erp-panel">
             <div class="erp-panel-header"><h3 class="text-base font-semibold text-slate-950">Summary</h3></div>
             <div class="erp-panel-body">
+                @php
+                    $summaryTotalInvoiceAmount = round((float) $salesInvoice->subtotal + (float) $salesInvoice->tax_amount, 2);
+                    $summaryBalanceAmount = round($summaryTotalInvoiceAmount - (float) $salesInvoice->withholding_tax_amount, 2);
+                @endphp
                 <div class="overflow-hidden border border-slate-400 bg-white">
                     <table class="w-full table-fixed border-collapse text-sm">
                         <thead class="bg-slate-200 text-xs font-bold uppercase text-slate-700">
@@ -115,22 +119,30 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Subtotal</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Subtotal <span class="font-normal text-slate-500">(Total amount no tax)</span></td>
                                 <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format((float) $salesInvoice->subtotal, 2) }}</td>
                             </tr>
                             <tr>
-                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Tax Amount <span class="font-normal text-slate-500">({{ number_format((float) $salesInvoice->tax_rate, 0) }}%)</span></td>
                                 <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format((float) $salesInvoice->tax_amount, 2) }}</td>
                             </tr>
                             <tr>
-                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">WHT Amount</td>
-                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">-{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Total Invoice Amount</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($summaryTotalInvoiceAmount, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Withholding Tax</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format((float) $salesInvoice->withholding_tax_amount, 2) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-700">Balance</td>
+                                <td class="border border-slate-300 px-3 py-2 text-right font-semibold text-slate-950">{{ number_format($summaryBalanceAmount, 2) }}</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-950 text-white">
                                 <td class="border border-slate-950 px-3 py-3 text-sm font-bold uppercase">Total Amount</td>
-                                <td class="border border-slate-950 px-3 py-3 text-right text-base font-bold">{{ number_format((float) $salesInvoice->total_amount, 2) }}</td>
+                                <td class="border border-slate-950 px-3 py-3 text-right text-base font-bold">{{ number_format($summaryBalanceAmount, 2) }}</td>
                             </tr>
                         </tfoot>
                     </table>

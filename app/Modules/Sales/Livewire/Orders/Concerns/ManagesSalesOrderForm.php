@@ -20,7 +20,7 @@ trait ManagesSalesOrderForm
 
     public string $sales_order_no = '';
     public string $order_date = '';
-    public int $no_of_days = 0;
+    public string $no_of_days = '0';
     public string $delivery_date = '';
     public string $customer_po = '';
     public string $agent_name = '';
@@ -103,7 +103,7 @@ trait ManagesSalesOrderForm
         $this->attachmentOnlyMode = app(SalesOrderService::class)->isAttachmentOnlyMode($salesOrder);
         $this->sales_order_no = $salesOrder->sales_order_no;
         $this->order_date = $salesOrder->order_date?->toDateString() ?? now()->toDateString();
-        $this->no_of_days = (int) $salesOrder->no_of_days;
+        $this->no_of_days = (string) (int) $salesOrder->no_of_days;
         $this->delivery_date = $salesOrder->delivery_date?->toDateString() ?? '';
         $this->customer_po = (string) $salesOrder->customer_po;
         $this->agent_name = $salesOrder->agent_name;
@@ -146,7 +146,11 @@ trait ManagesSalesOrderForm
     }
 
     public function updatedOrderDate(): void { $this->updateDeliveryDate(); }
-    public function updatedNoOfDays(): void { $this->updateDeliveryDate(); }
+    public function updatedNoOfDays(): void
+    {
+        $this->no_of_days = $this->sanitizeNoOfDays($this->no_of_days);
+        $this->updateDeliveryDate();
+    }
     public function updatedTaxRate(): void { $this->recalculateTotals(); }
 
     public function updatedItems($value, ?string $key = null): void
@@ -404,8 +408,21 @@ trait ManagesSalesOrderForm
     private function updateDeliveryDate(): void
     {
         if ($this->order_date !== '') {
-            $this->delivery_date = app(SalesOrderService::class)->deliveryDate($this->order_date, $this->no_of_days);
+            $days = $this->sanitizeNoOfDays($this->no_of_days);
+            $this->no_of_days = $days;
+            $this->delivery_date = app(SalesOrderService::class)->deliveryDate($this->order_date, $days);
         }
+    }
+
+    private function sanitizeNoOfDays(int|string|null $days): string
+    {
+        $raw = preg_replace('/[^0-9]/', '', (string) $days);
+
+        if ($raw === '') {
+            return '0';
+        }
+
+        return (string) min((int) $raw, SalesOrderService::MAX_NO_OF_DAYS);
     }
 
     private function recalculateQuickItemPrice(): void

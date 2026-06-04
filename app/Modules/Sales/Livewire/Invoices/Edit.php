@@ -147,7 +147,7 @@ class Edit extends Component
             $this->items[$index]['tax_amount'] = number_format($taxAmount, 2, '.', '');
             $this->items[$index]['withholding_tax_rate'] = (string) (int) $withholdingTaxRate;
             $this->items[$index]['withholding_tax_amount'] = number_format($withholdingTaxAmount, 2, '.', '');
-            $this->items[$index]['total'] = number_format($grossTotal - $withholdingTaxAmount, 2, '.', '');
+            $this->items[$index]['total'] = number_format($grossTotal, 2, '.', '');
         }
     }
 

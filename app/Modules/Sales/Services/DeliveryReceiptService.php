@@ -49,15 +49,21 @@ class DeliveryReceiptService
     public function nextDeliveryReceiptNo(): string
     {
         return DB::transaction(function (): string {
-            $prefix = 'DR'.now()->format('y-m').'-';
-            $last = DeliveryReceipt::query()
-                ->where('delivery_receipt_no', 'like', $prefix.'%')
+            $lastReceiptNo = DeliveryReceipt::query()
+                ->withTrashed()
                 ->lockForUpdate()
-                ->orderByDesc('id')
+                ->latest('id')
                 ->value('delivery_receipt_no');
-            $next = $last ? ((int) Str::afterLast($last, '-')) + 1 : 1;
 
-            return $prefix.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+            if ($lastReceiptNo && preg_match('/^(.*?)(\d+)$/', $lastReceiptNo, $matches)) {
+                $prefix = $matches[1];
+                $sequence = (int) $matches[2] + 1;
+                $width = strlen($matches[2]);
+
+                return $prefix.str_pad((string) $sequence, $width, '0', STR_PAD_LEFT);
+            }
+
+            return 'DR'.now()->format('y-m').'-001';
         });
     }
 
@@ -152,7 +158,7 @@ class DeliveryReceiptService
         return DB::transaction(function () use ($payload): DeliveryReceipt {
             $salesOrder = SalesOrder::query()->with(['items.item'])->findOrFail((int) $payload['sales_order_id']);
             $header = $this->headerPayload($payload);
-            $header['delivery_receipt_no'] = $this->nextDeliveryReceiptNo();
+            $header['delivery_receipt_no'] = strtoupper(trim((string) ($payload['delivery_receipt_no'] ?? ''))) ?: $this->nextDeliveryReceiptNo();
             $header['created_by'] = auth()->id();
             $header['updated_by'] = auth()->id();
             $dr = DeliveryReceipt::query()->create($header);

@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
 class SalesOrderService
 {
     private const MODULE = 'sales-orders';
+    public const MAX_NO_OF_DAYS = 3650;
 
     public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
@@ -63,7 +64,9 @@ class SalesOrderService
 
     public function deliveryDate(string $orderDate, int|string $days): string
     {
-        return \Illuminate\Support\Carbon::parse($orderDate)->addDays((int) $days)->toDateString();
+        $safeDays = min(max((int) $days, 0), self::MAX_NO_OF_DAYS);
+
+        return \Illuminate\Support\Carbon::parse($orderDate)->addDays($safeDays)->toDateString();
     }
 
     public function totals(array $items, float|int|string $taxRate): array
