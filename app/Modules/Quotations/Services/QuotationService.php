@@ -25,7 +25,6 @@ class QuotationService
             ->with([
                 'businessPartner:id,company_name,type,contact_no',
                 'preparedBy:id,name',
-                'referenceSalesOrder:id,sales_order_no',
                 'items:id,quotation_id,item_id,description,lead_time,unit_measure_id,item_price,quantity,total',
                 'items.item:id,item_name,item_image',
                 'items.unitMeasure:id,name',

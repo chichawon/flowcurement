@@ -13,13 +13,11 @@ class QuotationPolicy
     public function create(User $actor): bool { return $actor->can(QuotationPermissions::CREATE); }
     public function update(User $actor, Quotation $quotation): bool
     {
-        return $actor->can(QuotationPermissions::UPDATE)
-            && blank($quotation->reference_sales_order_id);
+        return $actor->can(QuotationPermissions::UPDATE);
     }
     public function delete(User $actor, Quotation $quotation): bool
     {
-        return $actor->can(QuotationPermissions::DELETE)
-            && blank($quotation->reference_sales_order_id);
+        return $actor->can(QuotationPermissions::DELETE);
     }
     public function print(User $actor, Quotation $quotation): bool { return $actor->can(QuotationPermissions::PRINT); }
     public function approve(User $actor, Quotation $quotation): bool { return $actor->can(QuotationPermissions::APPROVE); }

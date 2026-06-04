@@ -25,13 +25,6 @@ class QuotationEdit extends Component
             return;
         }
 
-        if ($record->reference_sales_order_id) {
-            session()->flash('toast', 'This quotation is already referenced by a Sales Order and can no longer be edited.');
-            $this->redirectRoute('quotations.index', navigate: false);
-
-            return;
-        }
-
         $this->authorize('update', $record);
         $this->fillFromQuotation($record);
         $this->bootQuotationForm();

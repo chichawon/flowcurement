@@ -61,7 +61,6 @@
                         <col class="w-[10%]">
                         <col class="w-[9%]">
                         <col class="w-[12%]">
-                        <col class="w-[9%]">
                     </colgroup>
                     <thead class="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
                         <tr>
@@ -73,7 +72,6 @@
                             <th class="px-3 py-3 text-left">Contact No</th>
                             <th class="px-3 py-3 text-left">Agent</th>
                             <th class="px-3 py-3 text-right">Total Amount</th>
-                            <th class="px-3 py-3 text-center">Reference</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
@@ -130,21 +128,10 @@
                                 <td class="px-3 py-3 text-right align-middle">
                                     <p class="font-semibold text-slate-950">{{ number_format((float) $quotation->total_amount, 2) }}</p>
                                 </td>
-                                <td class="px-3 py-3 text-center align-middle">
-                                    @if ($quotation->referenceSalesOrder)
-                                        <span class="inline-flex min-h-7 items-center rounded-md bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white">
-                                            {{ $quotation->referenceSalesOrder->sales_order_no }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex min-h-7 items-center rounded-md bg-slate-500 px-2.5 py-1 text-xs font-semibold text-white">
-                                            No Reference
-                                        </span>
-                                    @endif
-                                </td>
                             </tr>
                             @if (in_array($quotation->id, $expandedQuotationRows, true))
                                 <tr>
-                                    <td colspan="9" class="bg-slate-50/60 px-3 py-3">
+                                    <td colspan="8" class="bg-slate-50/60 px-3 py-3">
                                         <div class="overflow-x-auto rounded-md border border-slate-200 bg-white">
                                             <table class="min-w-[980px] w-full table-fixed divide-y divide-slate-200 text-xs">
                                                 <colgroup>
@@ -199,7 +186,7 @@
                             @endif
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-10 text-center text-sm text-slate-500">No quotations found.</td>
+                                <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">No quotations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

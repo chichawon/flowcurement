@@ -281,10 +281,6 @@ trait ManagesQuotationForm
                 return redirect()->route('quotations.index')->with('toast', 'Quotation record was already deleted or no longer exists.');
             }
 
-            if ($freshQuotation->reference_sales_order_id) {
-                return redirect()->route('quotations.index')->with('toast', 'This quotation is already referenced by a Sales Order and can no longer be edited.');
-            }
-
             $this->authorize('update', $freshQuotation);
             app(QuotationService::class)->update($freshQuotation, $payload);
             $message = 'Quotation updated successfully.';

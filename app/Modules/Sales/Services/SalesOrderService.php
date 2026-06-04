@@ -17,7 +17,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class SalesOrderService
 {
@@ -87,7 +86,6 @@ class SalesOrderService
             $data['sales_order_no'] = $this->nextSalesOrderNo();
             $salesOrder = SalesOrder::query()->create($this->headerPayload($data));
             $this->syncItems($salesOrder, $data['items']);
-            $this->syncQuotationReference($salesOrder, null, $data['quotation_id'] ?? null);
             $this->refreshStatusFromBalances($salesOrder);
 
             app(AuditTrailService::class)->record(self::MODULE, 'created', $salesOrder, null, $salesOrder->load('items')->toArray(), 'Sales order created: '.$salesOrder->sales_order_no);
@@ -114,10 +112,8 @@ class SalesOrderService
                 return $salesOrder->refresh();
             }
 
-            $previousQuotationId = $salesOrder->quotation_id;
             $salesOrder->update($this->headerPayload($data, false));
             $this->syncItems($salesOrder, $data['items']);
-            $this->syncQuotationReference($salesOrder, $previousQuotationId, $data['quotation_id'] ?? null);
             $this->refreshStatusFromBalances($salesOrder);
 
             app(AuditTrailService::class)->record(self::MODULE, 'updated', $salesOrder, $old, $salesOrder->load('items')->toArray(), 'Sales order updated: '.$salesOrder->sales_order_no);
@@ -246,43 +242,8 @@ class SalesOrderService
     {
         return Quotation::query()
             ->with('businessPartner:id,company_name')
-            ->where(function (Builder $query) use ($currentQuotationId): void {
-                $query->whereNull('reference_sales_order_id');
-                if ($currentQuotationId) {
-                    $query->orWhere('id', $currentQuotationId);
-                }
-            })
             ->latest('id')
             ->get(['id', 'quotation_no', 'business_partner_id', 'status']);
-    }
-
-    private function syncQuotationReference(SalesOrder $salesOrder, int|string|null $previousQuotationId, int|string|null $currentQuotationId): void
-    {
-        $currentId = $currentQuotationId ? (int) $currentQuotationId : null;
-
-        if (! $currentId) {
-            return;
-        }
-
-        $quotation = Quotation::query()->find($currentId);
-        if (! $quotation) {
-            throw ValidationException::withMessages([
-                'selected_quotation_id' => 'Selected quotation does not exist.',
-            ]);
-        }
-
-        if ($quotation->reference_sales_order_id && (int) $quotation->reference_sales_order_id !== (int) $salesOrder->id) {
-            throw ValidationException::withMessages([
-                'selected_quotation_id' => 'Quotation is already used as reference.',
-            ]);
-        }
-
-        if ((int) $quotation->reference_sales_order_id !== (int) $salesOrder->id) {
-            $quotation->update([
-                'reference_sales_order_id' => $salesOrder->id,
-                'updated_by' => auth()->id(),
-            ]);
-        }
     }
 
     private function headerPayload(array $data, bool $creating = true): array
