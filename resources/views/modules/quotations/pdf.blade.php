@@ -115,9 +115,8 @@
         }
 
         .remarks {
-            border: 1px solid #cbd5e1;
             margin-top: 16px;
-            padding: 9px 10px;
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -212,6 +211,9 @@
                                     @if ($row->description)
                                         <br>{{ $row->description }}
                                     @endif
+                                    @if ($row->lead_time)
+                                        <br><span class="muted">Lead Time: {{ $row->lead_time }}</span>
+                                    @endif
                                 </td>
                             </tr>
                         </table>
@@ -232,7 +234,7 @@
 
     @if ($quotation->remarks)
         <div class="remarks">
-            <strong>Remarks:</strong> {{ $quotation->remarks }}
+            {{ $quotation->remarks }}
         </div>
     @endif
 </body>

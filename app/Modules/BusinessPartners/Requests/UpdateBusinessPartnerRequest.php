@@ -34,6 +34,7 @@ class UpdateBusinessPartnerRequest extends FormRequest
             'tin_number' => ['required', 'regex:/^\d{3}-\d{3}-\d{3}-\d{3}$/'],
             'contact_person' => ['required', 'string', 'max:255'],
             'contact_no' => ['required', 'numeric', 'digits_between:1,11'],
+            'agent_name' => ['required', 'string', 'max:255'],
             'credit_limit' => ['nullable', 'numeric', 'min:0'],
             'company_address' => ['nullable', 'string'],
             'under_pesa' => ['required', Rule::in(BusinessPartnerOptions::UNDER_PESA)],

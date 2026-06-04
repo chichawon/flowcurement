@@ -9,6 +9,7 @@ use App\Modules\Quotations\Requests\StoreQuotationRequest;
 use App\Modules\Quotations\Requests\UpdateQuotationRequest;
 use App\Modules\Quotations\Services\QuotationService;
 use Illuminate\Validation\Rule;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait ManagesQuotationForm
 {
@@ -58,6 +59,8 @@ trait ManagesQuotationForm
 
     public string $quick_item_price = '0.00';
 
+    public $quick_item_image_upload = null;
+
     protected function formRules(): array
     {
         return $this->quotationRecord
@@ -75,6 +78,7 @@ trait ManagesQuotationForm
             'items.*.unit_measure_id' => 'unit measure',
             'items.*.item_price' => 'item price',
             'items.*.quantity' => 'quantity',
+            'items.*.lead_time' => 'lead time',
         ];
     }
 
@@ -86,6 +90,10 @@ trait ManagesQuotationForm
 
         if ($this->quotation_date === '') {
             $this->quotation_date = now()->toDateString();
+        }
+
+        if ($this->remarks === '') {
+            $this->remarks = $this->defaultRemarksTemplate();
         }
 
         $this->prepared_by_name = auth()->user()?->name ?? 'Current user';
@@ -108,7 +116,9 @@ trait ManagesQuotationForm
         $this->tax_rate = (string) (float) $quotation->tax_rate;
         $this->items = $quotation->items->map(fn ($item): array => [
             'item_id' => (string) $item->item_id,
+            'item_image' => (string) ($item->item?->item_image ?? ''),
             'description' => (string) $item->description,
+            'lead_time' => (string) $item->lead_time,
             'unit_measure_id' => (string) $item->unit_measure_id,
             'item_price' => number_format((float) $item->item_price, 2, '.', ''),
             'quantity' => (string) (float) $item->quantity,
@@ -128,6 +138,7 @@ trait ManagesQuotationForm
         $this->company_address = (string) ($client?->company_address ?? '');
         $this->contact_person = (string) ($client?->contact_person ?? '');
         $this->contact_no = (string) ($client?->contact_no ?? '');
+        $this->agent_name = (string) ($client?->agent_name ?? '');
     }
 
     public function updatedTaxRate(): void
@@ -135,9 +146,19 @@ trait ManagesQuotationForm
         $this->recalculateTotals();
     }
 
-    public function updatedItems($value, string $key): void
+    public function updatedItems($value, ?string $key = null): void
     {
+        if ($key === null) {
+            $this->recalculateTotals();
+
+            return;
+        }
+
         [$index, $field] = array_pad(explode('.', $key), 2, null);
+
+        if (! isset($this->items[(int) $index])) {
+            return;
+        }
 
         if ($field === 'item_id') {
             $this->fillItemPrice((int) $index);
@@ -164,7 +185,8 @@ trait ManagesQuotationForm
     public function closeQuickItemModal(): void
     {
         $this->showQuickItemModal = false;
-        $this->resetValidation(['quick_item_name', 'quick_supplier_price', 'quick_markup_percentage']);
+        $this->quick_item_image_upload = null;
+        $this->resetValidation(['quick_item_name', 'quick_supplier_price', 'quick_markup_percentage', 'quick_item_image_upload']);
     }
 
     public function updatedQuickSupplierPrice(): void
@@ -186,23 +208,33 @@ trait ManagesQuotationForm
             'quick_item_name' => ['required', 'string', 'max:255'],
             'quick_supplier_price' => ['required', 'numeric', 'min:0'],
             'quick_markup_percentage' => ['required', 'numeric', 'min:0'],
+            'quick_item_image_upload' => ['nullable', 'file', 'extensions:jpg,jpeg,png,gif,bmp,webp,svg,avif,heic,heif,tif,tiff,ico', 'max:10240'],
         ], [], [
             'quick_item_source' => 'item origin',
             'quick_item_name' => 'item name',
             'quick_supplier_price' => 'supplier price',
             'quick_markup_percentage' => 'markup percentage',
+            'quick_item_image_upload' => 'item image',
         ]);
+
+        $imagePath = null;
+        if ($this->quick_item_image_upload instanceof TemporaryUploadedFile) {
+            $imagePath = $this->quick_item_image_upload->store('uploads/items/'.$payload['quick_item_source'], 'public');
+        }
 
         $item = app(QuotationService::class)->createQuickItem([
             'item_source' => $payload['quick_item_source'],
             'item_name' => $payload['quick_item_name'],
             'supplier_price' => $payload['quick_supplier_price'],
             'percentage' => $payload['quick_markup_percentage'],
+            'item_image' => $imagePath,
         ]);
 
         $this->items[] = [
             'item_id' => (string) $item->id,
+            'item_image' => (string) ($item->item_image ?? ''),
             'description' => $item->item_name,
+            'lead_time' => '',
             'unit_measure_id' => '',
             'item_price' => number_format((float) $item->item_price, 2, '.', ''),
             'quantity' => '1',
@@ -213,6 +245,7 @@ trait ManagesQuotationForm
         $this->quick_supplier_price = '0.00';
         $this->quick_markup_percentage = '0.00';
         $this->quick_item_price = '0.00';
+        $this->quick_item_image_upload = null;
         $this->showQuickItemModal = false;
 
         $this->recalculateTotals();
@@ -269,7 +302,9 @@ trait ManagesQuotationForm
     {
         return [
             'item_id' => '',
+            'item_image' => '',
             'description' => '',
+            'lead_time' => '',
             'unit_measure_id' => '',
             'item_price' => '0.00',
             'quantity' => '1',
@@ -283,11 +318,13 @@ trait ManagesQuotationForm
 
         if (! $item) {
             $this->items[$index]['item_price'] = '0.00';
+            $this->items[$index]['item_image'] = '';
 
             return;
         }
 
         $this->items[$index]['item_price'] = number_format((float) $item->item_price, 2, '.', '');
+        $this->items[$index]['item_image'] = (string) ($item->item_image ?? '');
         $this->items[$index]['description'] = $this->items[$index]['description'] ?: $item->item_name;
     }
 
@@ -319,5 +356,19 @@ trait ManagesQuotationForm
     private function recalculateQuickItemPrice(): void
     {
         $this->quick_item_price = number_format(app(\App\Modules\Items\Services\ItemPricingService::class)->compute($this->quick_supplier_price, $this->quick_markup_percentage), 2, '.', '');
+    }
+
+    public function quickItemImagePreviewUrl(): ?string
+    {
+        if ($this->quick_item_image_upload instanceof TemporaryUploadedFile) {
+            return $this->quick_item_image_upload->temporaryUrl();
+        }
+
+        return null;
+    }
+
+    private function defaultRemarksTemplate(): string
+    {
+        return "*Notes\n\n    1. Items not included Packaging, Inventory\n    2. Advanced payment of 30% balance in one month\n    3. Minimum Quantity 2000, pieces.";
     }
 }

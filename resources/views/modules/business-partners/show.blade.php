@@ -36,6 +36,10 @@
                     <dt class="text-xs font-semibold uppercase text-slate-500">Contact No.</dt>
                     <dd class="mt-1 text-sm text-slate-700">{{ $businessPartner->contact_no }}</dd>
                 </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase text-slate-500">Agent Name</dt>
+                    <dd class="mt-1 text-sm text-slate-700">{{ $businessPartner->agent_name ?: 'No agent assigned.' }}</dd>
+                </div>
                 <div class="sm:col-span-2">
                     <dt class="text-xs font-semibold uppercase text-slate-500">Company Address</dt>
                     <dd class="mt-1 whitespace-pre-line text-sm text-slate-700">{{ $businessPartner->company_address ?: 'No address provided.' }}</dd>
@@ -62,7 +66,9 @@
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <dt class="text-sm text-slate-500">Terms</dt>
-                    <dd class="text-sm font-semibold text-slate-950">{{ $businessPartner->terms }} days</dd>
+                    <dd class="text-sm font-semibold text-slate-950">
+                        {{ is_numeric($businessPartner->terms) ? $businessPartner->terms.' days' : str($businessPartner->terms)->headline() }}
+                    </dd>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <dt class="text-sm text-slate-500">Credit Limit</dt>

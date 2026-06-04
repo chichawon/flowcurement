@@ -26,8 +26,8 @@ class QuotationService
                 'businessPartner:id,company_name,type,contact_no',
                 'preparedBy:id,name',
                 'referenceSalesOrder:id,sales_order_no',
-                'items:id,quotation_id,item_id,description,unit_measure_id,item_price,quantity,total',
-                'items.item:id,item_name',
+                'items:id,quotation_id,item_id,description,lead_time,unit_measure_id,item_price,quantity,total',
+                'items.item:id,item_name,item_image',
                 'items.unitMeasure:id,name',
             ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
@@ -125,12 +125,12 @@ class QuotationService
 
     public function clients(): Collection
     {
-        return BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'company_address', 'contact_person', 'contact_no']);
+        return BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'company_address', 'contact_person', 'contact_no', 'agent_name']);
     }
 
     public function activeItems(): Collection
     {
-        return Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price']);
+        return Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price', 'item_image']);
     }
 
     public function unitMeasures(): Collection
@@ -153,6 +153,7 @@ class QuotationService
                 'supplier_price' => (float) $data['supplier_price'],
                 'percentage' => (float) $data['percentage'],
                 'item_price' => $price,
+                'item_image' => $data['item_image'] ?? null,
                 'available_stock' => 0,
                 'reorder_point' => 0,
                 'taxable' => 'no',
@@ -201,6 +202,7 @@ class QuotationService
             $quotation->items()->create([
                 'item_id' => $row['item_id'],
                 'description' => $row['description'] ?? null,
+                'lead_time' => $row['lead_time'] ?? null,
                 'unit_measure_id' => $row['unit_measure_id'],
                 'item_price' => $price,
                 'quantity' => $qty,

@@ -102,9 +102,8 @@
         }
 
         .remarks {
-            border: 1px solid #cbd5e1;
             margin-top: 16px;
-            padding: 9px 10px;
+            white-space: pre-line;
         }
 
         .status {
@@ -266,7 +265,7 @@
 
     @if ($salesInvoice->remarks)
         <div class="remarks">
-            <strong>Remarks:</strong> {{ $salesInvoice->remarks }}
+            {{ $salesInvoice->remarks }}
         </div>
     @endif
 </body>

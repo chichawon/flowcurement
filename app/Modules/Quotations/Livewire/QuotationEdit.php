@@ -7,15 +7,17 @@ use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Services\QuotationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class QuotationEdit extends Component
 {
     use AuthorizesRequests;
     use ManagesQuotationForm;
+    use WithFileUploads;
 
     public function mount(int $quotation): void
     {
-        $record = Quotation::query()->with(['items'])->find($quotation);
+        $record = Quotation::query()->with(['items.item'])->find($quotation);
 
         if (! $record) {
             $this->redirectRoute('quotations.index', navigate: false);

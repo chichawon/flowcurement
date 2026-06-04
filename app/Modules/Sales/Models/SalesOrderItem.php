@@ -14,6 +14,7 @@ class SalesOrderItem extends Model
         'sales_order_id',
         'item_id',
         'description',
+        'lead_time',
         'order_quantity',
         'balance_quantity',
         'unit_measure_id',

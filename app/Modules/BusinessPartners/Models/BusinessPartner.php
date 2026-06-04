@@ -20,6 +20,7 @@ class BusinessPartner extends Model
         'tin_number',
         'contact_person',
         'contact_no',
+        'agent_name',
         'credit_limit',
         'company_address',
         'under_pesa',
@@ -34,7 +35,6 @@ class BusinessPartner extends Model
     {
         return [
             'credit_limit' => 'decimal:2',
-            'terms' => 'integer',
         ];
     }
 

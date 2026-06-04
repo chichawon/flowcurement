@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('sales_order_id')->constrained('sales_orders')->cascadeOnDelete();
             $table->foreignId('item_id')->constrained('items');
             $table->text('description')->nullable();
+            $table->string('lead_time')->nullable();
             $table->decimal('order_quantity', 15, 2);
             $table->decimal('balance_quantity', 15, 2)->default(0);
             $table->foreignId('unit_measure_id')->constrained('unit_measures');

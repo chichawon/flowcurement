@@ -42,6 +42,7 @@ class ClientEdit extends Component
             'title' => 'Edit Client',
             'submitLabel' => 'Save Client',
             'cancelRoute' => route('clients.index'),
+            'partnerType' => $this->partnerType(),
         ]);
     }
 }

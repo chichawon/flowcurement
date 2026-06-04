@@ -50,6 +50,10 @@
                         <option value="30">30 days</option>
                         <option value="60">60 days</option>
                         <option value="90">90 days</option>
+                        @if (($partnerType ?? null) === 'supplier')
+                            <option value="cash">Cash</option>
+                            <option value="check">Check</option>
+                        @endif
                     </select>
                 </label>
 
@@ -149,7 +153,9 @@
                                         <x-business-partners.value-badge :value="$partner->under_pesa" tone="amber" />
                                     </div>
                                 </td>
-                                <td class="px-3 py-3 text-center align-middle">{{ $partner->terms }} days</td>
+                                <td class="px-3 py-3 text-center align-middle">
+                                    {{ is_numeric($partner->terms) ? $partner->terms.' days' : str($partner->terms)->headline() }}
+                                </td>
                                 <td class="px-3 py-3 text-right align-middle font-semibold text-slate-900">{{ number_format((float) $partner->credit_limit, 2) }}</td>
                                 <td class="px-3 py-3 text-center align-middle">
                                     <div class="flex flex-col items-center gap-1">

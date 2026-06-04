@@ -7,11 +7,13 @@ use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Services\QuotationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class QuotationCreate extends Component
 {
     use AuthorizesRequests;
     use ManagesQuotationForm;
+    use WithFileUploads;
 
     public function mount(): void
     {

@@ -32,6 +32,7 @@ class SupplierCreate extends Component
             'title' => 'Create Supplier',
             'submitLabel' => 'Create Supplier',
             'cancelRoute' => route('suppliers.index'),
+            'partnerType' => $this->partnerType(),
         ]);
     }
 }

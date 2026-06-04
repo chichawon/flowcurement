@@ -16,11 +16,12 @@ return new class extends Migration
             $table->string('tin_number', 15);
             $table->string('contact_person');
             $table->string('contact_no', 11);
+            $table->string('agent_name')->nullable();
             $table->decimal('credit_limit', 15, 2)->default(0);
             $table->text('company_address')->nullable();
             $table->string('under_pesa', 10)->default('no');
             $table->string('vatable', 20)->default('non_vat');
-            $table->unsignedSmallInteger('terms')->default(30);
+            $table->string('terms', 30)->default('30');
             $table->string('status', 20)->default('active')->index();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();

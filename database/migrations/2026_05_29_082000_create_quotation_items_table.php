@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('quotation_id')->constrained('quotations')->cascadeOnDelete();
             $table->foreignId('item_id')->constrained('items')->restrictOnDelete();
             $table->text('description')->nullable();
+            $table->string('lead_time')->nullable();
             $table->foreignId('unit_measure_id')->constrained('unit_measures')->restrictOnDelete();
             $table->decimal('item_price', 15, 2)->default(0);
             $table->decimal('quantity', 15, 2)->default(1);

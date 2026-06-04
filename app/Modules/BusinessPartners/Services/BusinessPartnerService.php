@@ -27,12 +27,13 @@ class BusinessPartnerService
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('company_name', 'like', "%{$search}%")
                         ->orWhere('company_code', 'like', "%{$search}%")
-                        ->orWhere('contact_person', 'like', "%{$search}%");
+                        ->orWhere('contact_person', 'like', "%{$search}%")
+                        ->orWhere('agent_name', 'like', "%{$search}%");
                 });
             })
             ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($filters['vatable'] ?? null, fn (Builder $query, string $vatable) => $query->where('vatable', $vatable))
-            ->when($filters['terms'] ?? null, fn (Builder $query, mixed $terms) => $query->where('terms', (int) $terms))
+            ->when($filters['terms'] ?? null, fn (Builder $query, mixed $terms) => $query->where('terms', (string) $terms))
             ->when($filters['under_pesa'] ?? null, fn (Builder $query, string $underPesa) => $query->where('under_pesa', $underPesa))
             ->latest('id')
             ->paginate($perPage);
@@ -148,6 +149,7 @@ class BusinessPartnerService
             'tin_number',
             'contact_person',
             'contact_no',
+            'agent_name',
             'credit_limit',
             'company_address',
             'under_pesa',
@@ -161,7 +163,7 @@ class BusinessPartnerService
         $payload['type'] = $type;
         $payload['company_code'] = strtoupper((string) ($payload['company_code'] ?? ''));
         $payload['credit_limit'] = (float) ($payload['credit_limit'] ?? 0);
-        $payload['terms'] = (int) ($payload['terms'] ?? 30);
+        $payload['terms'] = (string) ($payload['terms'] ?? '30');
 
         if (! $creating) {
             unset($payload['created_by']);

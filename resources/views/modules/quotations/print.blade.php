@@ -43,8 +43,9 @@
 
         <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
             <colgroup>
-                <col class="w-[24%]">
-                <col class="w-[32%]">
+                <col class="w-[22%]">
+                <col class="w-[28%]">
+                <col class="w-[12%]">
                 <col class="w-[12%]">
                 <col class="w-[12%]">
                 <col class="w-[8%]">
@@ -54,6 +55,7 @@
                 <tr>
                     <th class="px-3 py-3 text-left">Item</th>
                     <th class="px-3 py-3 text-left">Description</th>
+                    <th class="px-3 py-3 text-left">Lead Time</th>
                     <th class="px-3 py-3 text-left">Unit</th>
                     <th class="px-3 py-3 text-right">Price</th>
                     <th class="px-3 py-3 text-center">Qty</th>
@@ -65,6 +67,7 @@
                     <tr>
                         <td class="px-3 py-3 font-semibold text-slate-950">{{ $row->item?->item_name }}</td>
                         <td class="px-3 py-3 text-slate-700">{{ $row->description }}</td>
+                        <td class="px-3 py-3 text-slate-700">{{ $row->lead_time ?: '-' }}</td>
                         <td class="px-3 py-3 text-slate-700">{{ str($row->unitMeasure?->name)->headline() }}</td>
                         <td class="px-3 py-3 text-right">{{ number_format((float) $row->item_price, 2) }}</td>
                         <td class="px-3 py-3 text-center">{{ number_format((float) $row->quantity, 0) }}</td>
@@ -92,9 +95,8 @@
         </div>
 
         @if ($quotation->remarks)
-            <div class="mt-8 rounded-lg border border-slate-200 p-4 text-sm text-slate-700">
-                <p class="font-semibold text-slate-950">Remarks</p>
-                <p class="mt-2">{{ $quotation->remarks }}</p>
+            <div class="mt-8 whitespace-pre-line rounded-lg border border-slate-200 p-4 text-sm text-slate-700">
+                {{ $quotation->remarks }}
             </div>
         @endif
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuotationItem extends Model
 {
-    protected $fillable = ['quotation_id', 'item_id', 'description', 'unit_measure_id', 'item_price', 'quantity', 'total'];
+    protected $fillable = ['quotation_id', 'item_id', 'description', 'lead_time', 'unit_measure_id', 'item_price', 'quantity', 'total'];
 
     protected function casts(): array
     {

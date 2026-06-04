@@ -111,8 +111,12 @@ trait ManagesDeliveryReceiptForm
         $this->notice = $hasAnyDeliverable ? null : 'All items in this Sales Order have no available stocks.';
     }
 
-    public function updatedItems($value, string $key): void
+    public function updatedItems($value, ?string $key = null): void
     {
+        if ($key === null) {
+            return;
+        }
+
         [$index, $field] = array_pad(explode('.', $key), 2, null);
         if (! isset($this->items[$index])) {
             return;

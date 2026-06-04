@@ -6,6 +6,7 @@ use App\Modules\BusinessPartners\Models\BusinessPartner;
 use App\Modules\BusinessPartners\Requests\StoreBusinessPartnerRequest;
 use App\Modules\BusinessPartners\Requests\UpdateBusinessPartnerRequest;
 use App\Modules\BusinessPartners\Services\BusinessPartnerService;
+use Illuminate\Validation\Rule;
 
 trait ManagesBusinessPartnerForm
 {
@@ -21,6 +22,8 @@ trait ManagesBusinessPartnerForm
 
     public string $contact_no = '';
 
+    public string $agent_name = '';
+
     public string $credit_limit = '0.00';
 
     public string $company_address = '';
@@ -29,7 +32,7 @@ trait ManagesBusinessPartnerForm
 
     public string $vatable = 'non_vat';
 
-    public int $terms = 30;
+    public string $terms = '30';
 
     public string $status = 'active';
 
@@ -39,9 +42,16 @@ trait ManagesBusinessPartnerForm
 
     protected function formRules(): array
     {
-        return $this->partnerRecord
+        $rules = $this->partnerRecord
             ? UpdateBusinessPartnerRequest::rulesArray($this->partnerRecord->id)
             : StoreBusinessPartnerRequest::rulesArray();
+
+        $rules['terms'] = [
+            'required',
+            Rule::in($this->partnerType() === 'supplier' ? ['30', '60', '90', 'cash', 'check'] : ['30', '60', '90']),
+        ];
+
+        return $rules;
     }
 
     /**
@@ -55,6 +65,7 @@ trait ManagesBusinessPartnerForm
             'tin_number' => 'TIN number',
             'contact_person' => 'contact person',
             'contact_no' => 'contact number',
+            'agent_name' => 'agent name',
             'credit_limit' => 'credit limit',
             'company_address' => 'company address',
             'under_pesa' => 'under PESA',
@@ -102,11 +113,12 @@ trait ManagesBusinessPartnerForm
         $this->tin_number = $businessPartner->tin_number;
         $this->contact_person = $businessPartner->contact_person;
         $this->contact_no = $businessPartner->contact_no;
+        $this->agent_name = (string) $businessPartner->agent_name;
         $this->credit_limit = number_format((float) $businessPartner->credit_limit, 2, '.', '');
         $this->company_address = $businessPartner->company_address ?? '';
         $this->under_pesa = $businessPartner->under_pesa;
         $this->vatable = $businessPartner->vatable;
-        $this->terms = $businessPartner->terms;
+        $this->terms = (string) $businessPartner->terms;
         $this->status = $businessPartner->status;
     }
 

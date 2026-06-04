@@ -84,7 +84,7 @@
             </section>
         </div>
 
-        <section class="erp-panel">
+        <section class="erp-panel" x-data="{ imagePreviewOpen: false, imagePreviewUrl: '', imagePreviewTitle: '' }">
             <div class="erp-panel-header">
                 <h3 class="text-sm font-semibold text-slate-950">Items</h3>
             </div>
@@ -92,8 +92,9 @@
                 <div class="overflow-hidden rounded-lg border border-slate-200">
                     <table class="w-full table-fixed divide-y divide-slate-200 text-sm">
                         <colgroup>
-                            <col class="w-[24%]">
-                            <col class="w-[30%]">
+                            <col class="w-[22%]">
+                            <col class="w-[26%]">
+                            <col class="w-[12%]">
                             <col class="w-[12%]">
                             <col class="w-[12%]">
                             <col class="w-[10%]">
@@ -103,6 +104,7 @@
                             <tr>
                                 <th class="px-3 py-3 text-left">Item</th>
                                 <th class="px-3 py-3 text-left">Description</th>
+                                <th class="px-3 py-3 text-left">Lead Time</th>
                                 <th class="px-3 py-3 text-left">Unit</th>
                                 <th class="px-3 py-3 text-right">Price</th>
                                 <th class="px-3 py-3 text-center">Qty</th>
@@ -111,11 +113,25 @@
                         </thead>
                         <tbody class="divide-y divide-slate-200 bg-white">
                             @foreach ($quotation->items as $row)
+                                @php
+                                    $itemImageUrl = $row->item?->item_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($row->item->item_image) : null;
+                                    $itemName = $row->item?->item_name ?? 'Item';
+                                @endphp
                                 <tr>
                                     <td class="px-3 py-3 align-middle">
-                                        <p class="truncate font-semibold text-slate-950">{{ $row->item?->item_name }}</p>
+                                        <div class="flex items-center gap-2">
+                                            @if ($itemImageUrl)
+                                                <button type="button" class="size-10 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white" @click="imagePreviewUrl = @js($itemImageUrl); imagePreviewTitle = @js($itemName); imagePreviewOpen = true">
+                                                    <img src="{{ $itemImageUrl }}" alt="{{ $itemName }}" class="h-full w-full object-cover">
+                                                </button>
+                                            @else
+                                                <span class="grid size-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-xs font-bold text-slate-500">{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                            @endif
+                                            <p class="truncate font-semibold text-slate-950">{{ $itemName }}</p>
+                                        </div>
                                     </td>
                                     <td class="px-3 py-3 text-slate-700">{{ $row->description }}</td>
+                                    <td class="px-3 py-3 text-slate-700">{{ $row->lead_time ?: '-' }}</td>
                                     <td class="px-3 py-3 text-slate-700">{{ str($row->unitMeasure?->name)->headline() }}</td>
                                     <td class="px-3 py-3 text-right font-semibold text-slate-950">{{ number_format((float) $row->item_price, 2) }}</td>
                                     <td class="px-3 py-3 text-center text-slate-700">{{ number_format((float) $row->quantity, 0) }}</td>
@@ -126,14 +142,22 @@
                     </table>
                 </div>
             </div>
+            <div x-show="imagePreviewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4">
+                <div class="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                        <h4 class="text-sm font-semibold text-slate-950" x-text="imagePreviewTitle || 'Item Image'"></h4>
+                        <button type="button" @click="imagePreviewOpen = false" class="rounded-md px-2 py-1 text-sm font-semibold text-slate-500 hover:bg-slate-100">Close</button>
+                    </div>
+                    <div class="bg-slate-50 p-4">
+                        <img :src="imagePreviewUrl" alt="Item preview" class="mx-auto max-h-[32rem] max-w-full rounded-md object-contain">
+                    </div>
+                </div>
+            </div>
         </section>
 
         @if ($quotation->remarks)
             <section class="erp-panel">
-                <div class="erp-panel-header">
-                    <h3 class="text-sm font-semibold text-slate-950">Remarks</h3>
-                </div>
-                <div class="erp-panel-body text-sm text-slate-700">{{ $quotation->remarks }}</div>
+                <div class="erp-panel-body whitespace-pre-line text-sm text-slate-700">{{ $quotation->remarks }}</div>
             </section>
         @endif
     </div>

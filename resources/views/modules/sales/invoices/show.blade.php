@@ -6,7 +6,7 @@
         </div>
     </x-slot>
 
-    <div class="space-y-5">
+    <div class="space-y-5" x-data="{ imagePreviewOpen: false, imagePreviewUrl: '', imagePreviewTitle: '' }">
         <section class="erp-panel">
             <div class="erp-panel-header flex items-center justify-between">
                 <h3 class="text-base font-semibold text-slate-950">Invoice Details</h3>
@@ -58,8 +58,23 @@
                         </thead>
                         <tbody class="bg-white">
                             @foreach ($salesInvoice->items as $row)
+                                @php
+                                    $itemImageUrl = $row->item?->item_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($row->item->item_image) : null;
+                                    $itemName = $row->item_name ?? 'Item';
+                                @endphp
                                 <tr>
-                                    <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-950">{{ $row->item_name }}</td>
+                                    <td class="border border-slate-300 px-3 py-2 font-semibold text-slate-950">
+                                        <div class="flex items-center gap-2">
+                                            @if ($itemImageUrl)
+                                                <button type="button" class="size-10 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white" @click="imagePreviewUrl = @js($itemImageUrl); imagePreviewTitle = @js($itemName); imagePreviewOpen = true">
+                                                    <img src="{{ $itemImageUrl }}" alt="{{ $itemName }}" class="h-full w-full object-cover">
+                                                </button>
+                                            @else
+                                                <span class="grid size-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-xs font-bold text-slate-500">{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                            @endif
+                                            <span class="min-w-0 truncate">{{ $itemName }}</span>
+                                        </div>
+                                    </td>
                                     <td class="border border-slate-300 px-3 py-2 text-slate-700">{{ $row->description ?: '-' }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-right text-slate-700">{{ number_format((float) $row->withholding_tax_rate, 0) }}% / {{ number_format((float) $row->withholding_tax_amount, 2) }}</td>
                                     <td class="border border-slate-300 px-3 py-2 text-slate-700">{{ str($row->unitMeasure?->name)->headline() }}</td>
@@ -72,6 +87,17 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div x-show="imagePreviewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4">
+                <div class="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                        <h4 class="text-sm font-semibold text-slate-950" x-text="imagePreviewTitle || 'Item Image'"></h4>
+                        <button type="button" @click="imagePreviewOpen = false" class="rounded-md px-2 py-1 text-sm font-semibold text-slate-500 hover:bg-slate-100">Close</button>
+                    </div>
+                    <div class="bg-slate-50 p-4">
+                        <img :src="imagePreviewUrl" alt="Item preview" class="mx-auto max-h-[32rem] max-w-full rounded-md object-contain">
+                    </div>
                 </div>
             </div>
         </section>
@@ -110,7 +136,7 @@
                     </table>
                 </div>
                 @if ($salesInvoice->remarks)
-                    <div class="mt-4 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><span class="font-semibold">Remarks:</span> {{ $salesInvoice->remarks }}</div>
+                    <div class="mt-4 whitespace-pre-line rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">{{ $salesInvoice->remarks }}</div>
                 @endif
             </div>
         </section>

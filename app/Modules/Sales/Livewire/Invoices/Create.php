@@ -38,6 +38,7 @@ class Create extends Component
         $this->authorize('create', SalesInvoice::class);
         $this->sales_invoice_no = app(SalesInvoiceService::class)->nextSalesInvoiceNo();
         $this->invoice_date = now()->toDateString();
+        $this->remarks = $this->defaultRemarksTemplate();
     }
 
     public function updatedDeliveryReceiptId(): void
@@ -160,5 +161,10 @@ class Create extends Component
             'remarks' => $this->remarks,
             'items' => $this->items,
         ];
+    }
+
+    private function defaultRemarksTemplate(): string
+    {
+        return "*Notes\n\n    1. Items not included Packaging, Inventory\n    2. Advanced payment of 30% balance in one month\n    3. Minimum Quantity 2000, pieces.";
     }
 }

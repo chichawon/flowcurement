@@ -24,7 +24,7 @@ class SalesInvoicePageController extends Controller
     public function show(int $salesInvoice): View|RedirectResponse
     {
         $salesInvoice = SalesInvoice::query()
-            ->with(['items.unitMeasure', 'businessPartner:id,company_name', 'salesOrder:id,sales_order_no', 'deliveryReceipt:id,delivery_receipt_no'])
+            ->with(['items.unitMeasure', 'items.item:id,item_name,item_code,item_image', 'businessPartner:id,company_name', 'salesOrder:id,sales_order_no', 'deliveryReceipt:id,delivery_receipt_no'])
             ->find($salesInvoice);
 
         if (! $salesInvoice) {
@@ -70,7 +70,7 @@ class SalesInvoicePageController extends Controller
             'businessPartner:id,company_name,company_code',
             'salesOrder:id,sales_order_no',
             'deliveryReceipt:id,delivery_receipt_no',
-            'items.item:id,item_name,item_code',
+            'items.item:id,item_name,item_code,item_image',
             'items.unitMeasure:id,name',
             'creator:id,name',
         ]);

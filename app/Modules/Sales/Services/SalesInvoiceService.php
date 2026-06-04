@@ -71,7 +71,7 @@ class SalesInvoiceService
         $receipt = DeliveryReceipt::query()->with([
             'salesOrder:id,sales_order_no,currency,tax_rate',
             'businessPartner:id,company_name',
-            'items.item:id,item_name',
+            'items.item:id,item_name,item_image',
             'items.unitMeasure:id,name',
             'items.salesOrderItem:id,description,price,total',
         ])->find($deliveryReceiptId);
@@ -106,6 +106,7 @@ class SalesInvoiceService
                     'sales_order_item_id' => $row->sales_order_item_id,
                     'item_id' => $row->item_id,
                     'item_name' => (string) ($row->item?->item_name ?? $row->item_name),
+                    'item_image' => (string) ($row->item?->item_image ?? ''),
                     'description' => (string) ($row->salesOrderItem?->description ?? ''),
                     'unit_measure_id' => $row->unit_measure_id,
                     'unit_measure_name' => (string) ($row->unitMeasure?->name ?? ''),

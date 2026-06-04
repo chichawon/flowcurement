@@ -182,6 +182,7 @@ class SalesOrderService
                 'supplier_price' => (float) $data['supplier_price'],
                 'percentage' => (float) $data['percentage'],
                 'item_price' => $price,
+                'item_image' => $data['item_image'] ?? null,
                 'available_stock' => 0,
                 'reorder_point' => 0,
                 'taxable' => 'no',
@@ -198,12 +199,13 @@ class SalesOrderService
 
     public function quotationRows(Quotation $quotation): array
     {
-        $quotation->load(['businessPartner', 'items.item:id,item_name,item_code,item_price,available_stock', 'items.unitMeasure']);
+        $quotation->load(['businessPartner', 'items.item:id,item_name,item_code,item_price,available_stock,item_image', 'items.unitMeasure']);
 
         return [
             'customer' => [
                 'business_partner_id' => (string) $quotation->business_partner_id,
                 'terms' => (int) ($quotation->businessPartner?->terms ?? 30),
+                'agent_name' => (string) $quotation->agent_name,
                 'company_address' => (string) $quotation->company_address,
                 'contact_person' => (string) $quotation->contact_person,
                 'contact_no' => (string) $quotation->contact_no,
@@ -212,7 +214,9 @@ class SalesOrderService
             ],
             'items' => $quotation->items->map(fn ($row): array => [
                 'item_id' => (string) $row->item_id,
+                'item_image' => (string) ($row->item?->item_image ?? ''),
                 'description' => (string) $row->description,
+                'lead_time' => (string) $row->lead_time,
                 'order_quantity' => (string) (float) $row->quantity,
                 'unit_measure_id' => (string) $row->unit_measure_id,
                 'price' => number_format((float) $row->item_price, 2, '.', ''),
@@ -225,12 +229,12 @@ class SalesOrderService
 
     public function clients(): Collection
     {
-        return BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'terms', 'company_address', 'contact_person', 'contact_no']);
+        return BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'terms', 'company_address', 'contact_person', 'contact_no', 'agent_name']);
     }
 
     public function activeItems(): Collection
     {
-        return Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price', 'available_stock']);
+        return Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price', 'available_stock', 'item_image']);
     }
 
     public function unitMeasures(): Collection
@@ -320,6 +324,7 @@ class SalesOrderService
             $payload = [
                 'item_id' => $row['item_id'],
                 'description' => $row['description'] ?? null,
+                'lead_time' => $row['lead_time'] ?? null,
                 'order_quantity' => $qty,
                 'unit_measure_id' => $row['unit_measure_id'],
                 'price' => $price,
@@ -381,8 +386,8 @@ class SalesOrderService
             ->with([
                 'businessPartner:id,company_name,type',
                 'creator:id,name',
-                'items:id,sales_order_id,item_id,unit_measure_id,order_quantity,balance_quantity,total',
-                'items.item:id,item_name',
+                'items:id,sales_order_id,item_id,lead_time,unit_measure_id,order_quantity,balance_quantity,total',
+                'items.item:id,item_name,item_image',
                 'items.unitMeasure:id,name',
                 'items.deliveryReceiptItems:id,delivery_receipt_id,sales_order_item_id,delivered_quantity,delivery_no,delivered_date,delivered_by,received_by',
                 'items.deliveryReceiptItems.deliveryReceipt:id,delivery_receipt_no,status,dr_date,received_date,received_by,delivered_by',

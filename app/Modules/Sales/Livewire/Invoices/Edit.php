@@ -39,10 +39,10 @@ class Edit extends Component
     {
         $this->invoice = $salesInvoice instanceof SalesInvoice
             ? $salesInvoice
-            : SalesInvoice::query()->with(['items.unitMeasure'])->findOrFail($salesInvoice);
+            : SalesInvoice::query()->with(['items.unitMeasure', 'items.item'])->findOrFail($salesInvoice);
 
         $this->authorize('update', $this->invoice);
-        $this->fillFromInvoice($this->invoice->load('items.unitMeasure'));
+        $this->fillFromInvoice($this->invoice->load(['items.unitMeasure', 'items.item']));
     }
 
     public function updatedTaxRate(): void
@@ -93,6 +93,10 @@ class Edit extends Component
             $this->{$field} = (string) ($invoice->{$field} ?? '');
         }
 
+        if ($this->remarks === '') {
+            $this->remarks = $this->defaultRemarksTemplate();
+        }
+
         $this->invoice_date = $invoice->invoice_date?->toDateString() ?? now()->toDateString();
         $this->due_date = $invoice->due_date?->toDateString() ?? '';
         $this->delivery_receipt_id = (string) $invoice->delivery_receipt_id;
@@ -106,6 +110,7 @@ class Edit extends Component
             'sales_order_item_id' => $item->sales_order_item_id,
             'item_id' => $item->item_id,
             'item_name' => $item->item_name,
+            'item_image' => (string) ($item->item?->item_image ?? ''),
             'description' => (string) $item->description,
             'unit_measure_id' => $item->unit_measure_id,
             'unit_measure_name' => (string) ($item->unitMeasure?->name ?? ''),
@@ -176,5 +181,10 @@ class Edit extends Component
             'remarks' => $this->remarks,
             'items' => $this->items,
         ];
+    }
+
+    private function defaultRemarksTemplate(): string
+    {
+        return "*Notes\n\n    1. Items not included Packaging, Inventory\n    2. Advanced payment of 30% balance in one month\n    3. Minimum Quantity 2000, pieces.";
     }
 }

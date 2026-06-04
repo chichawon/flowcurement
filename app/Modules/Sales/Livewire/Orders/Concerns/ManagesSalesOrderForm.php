@@ -47,6 +47,7 @@ trait ManagesSalesOrderForm
     public string $quick_supplier_price = '0.00';
     public string $quick_markup_percentage = '0.00';
     public string $quick_item_price = '0.00';
+    public $quick_item_image_upload = null;
 
     public bool $showQuotationModal = false;
     public string $selected_quotation_id = '';
@@ -68,6 +69,7 @@ trait ManagesSalesOrderForm
             'items.*.item_id' => 'item',
             'items.*.order_quantity' => 'order quantity',
             'items.*.unit_measure_id' => 'unit',
+            'items.*.lead_time' => 'lead time',
         ];
     }
 
@@ -79,6 +81,10 @@ trait ManagesSalesOrderForm
 
         if ($this->delivery_date === '') {
             $this->delivery_date = app(SalesOrderService::class)->deliveryDate($this->order_date, $this->no_of_days);
+        }
+
+        if ($this->remarks === '') {
+            $this->remarks = $this->defaultRemarksTemplate();
         }
 
         if ($this->items === []) {
@@ -116,7 +122,9 @@ trait ManagesSalesOrderForm
             'id' => (string) $row->id,
             'row_key' => $this->newItemRowKey(),
             'item_id' => (string) $row->item_id,
+            'item_image' => (string) ($row->item?->item_image ?? ''),
             'description' => (string) $row->description,
+            'lead_time' => (string) $row->lead_time,
             'order_quantity' => (string) (float) $row->order_quantity,
             'unit_measure_id' => (string) $row->unit_measure_id,
             'price' => number_format((float) $row->price, 2, '.', ''),
@@ -134,17 +142,25 @@ trait ManagesSalesOrderForm
         $this->company_address = (string) ($client?->company_address ?? '');
         $this->contact_person = (string) ($client?->contact_person ?? '');
         $this->contact_no = (string) ($client?->contact_no ?? '');
+        $this->agent_name = (string) ($client?->agent_name ?? '');
     }
 
     public function updatedOrderDate(): void { $this->updateDeliveryDate(); }
     public function updatedNoOfDays(): void { $this->updateDeliveryDate(); }
     public function updatedTaxRate(): void { $this->recalculateTotals(); }
 
-    public function updatedItems($value, string $key): void
+    public function updatedItems($value, ?string $key = null): void
     {
         if ($this->attachmentOnlyMode) {
             return;
         }
+
+        if ($key === null) {
+            $this->recalculateTotals();
+
+            return;
+        }
+
         [$index, $field] = array_pad(explode('.', $key), 2, null);
         if (! isset($this->items[(int) $index])) {
             return;
@@ -202,7 +218,8 @@ trait ManagesSalesOrderForm
     public function closeQuickItemModal(): void
     {
         $this->showQuickItemModal = false;
-        $this->resetValidation(['quick_item_name', 'quick_supplier_price', 'quick_markup_percentage']);
+        $this->quick_item_image_upload = null;
+        $this->resetValidation(['quick_item_name', 'quick_supplier_price', 'quick_markup_percentage', 'quick_item_image_upload']);
     }
 
     public function updatedQuickSupplierPrice(): void { $this->recalculateQuickItemPrice(); }
@@ -220,18 +237,26 @@ trait ManagesSalesOrderForm
             'quick_item_name' => ['required', 'string', 'max:255'],
             'quick_supplier_price' => ['required', 'numeric', 'min:0'],
             'quick_markup_percentage' => ['required', 'numeric', 'min:0'],
+            'quick_item_image_upload' => ['nullable', 'file', 'extensions:jpg,jpeg,png,gif,bmp,webp,svg,avif,heic,heif,tif,tiff,ico', 'max:10240'],
         ], [], [
             'quick_item_source' => 'item origin',
             'quick_item_name' => 'item name',
             'quick_supplier_price' => 'supplier price',
             'quick_markup_percentage' => 'markup percentage',
+            'quick_item_image_upload' => 'item image',
         ]);
+
+        $imagePath = null;
+        if ($this->quick_item_image_upload instanceof TemporaryUploadedFile) {
+            $imagePath = $this->quick_item_image_upload->store('uploads/items/'.$payload['quick_item_source'], 'public');
+        }
 
         $item = app(SalesOrderService::class)->createQuickItem([
             'item_source' => $payload['quick_item_source'],
             'item_name' => $payload['quick_item_name'],
             'supplier_price' => $payload['quick_supplier_price'],
             'percentage' => $payload['quick_markup_percentage'],
+            'item_image' => $imagePath,
         ]);
 
         $this->ensureItemRowKeys();
@@ -239,7 +264,9 @@ trait ManagesSalesOrderForm
             'id' => null,
             'row_key' => $this->newItemRowKey(),
             'item_id' => (string) $item->id,
+            'item_image' => (string) ($item->item_image ?? ''),
             'description' => $item->item_name,
+            'lead_time' => '',
             'order_quantity' => '1',
             'unit_measure_id' => '',
             'price' => number_format((float) $item->item_price, 2, '.', ''),
@@ -252,6 +279,7 @@ trait ManagesSalesOrderForm
         $this->quick_supplier_price = '0.00';
         $this->quick_markup_percentage = '0.00';
         $this->quick_item_price = '0.00';
+        $this->quick_item_image_upload = null;
         $this->showQuickItemModal = false;
         $this->recalculateTotals();
     }
@@ -390,16 +418,27 @@ trait ManagesSalesOrderForm
         $this->quick_item_price = number_format(app(\App\Modules\Items\Services\ItemPricingService::class)->compute($this->quick_supplier_price, $this->quick_markup_percentage), 2, '.', '');
     }
 
+    public function quickItemImagePreviewUrl(): ?string
+    {
+        if ($this->quick_item_image_upload instanceof TemporaryUploadedFile) {
+            return $this->quick_item_image_upload->temporaryUrl();
+        }
+
+        return null;
+    }
+
     private function fillItemDetails(int $index): void
     {
         $item = Item::query()->where('status', 'active')->find($this->items[$index]['item_id'] ?? null);
         if (! $item) {
             $this->items[$index]['price'] = '0.00';
             $this->items[$index]['available_stock'] = '0.00';
+            $this->items[$index]['item_image'] = '';
             return;
         }
         $this->items[$index]['price'] = number_format((float) $item->item_price, 2, '.', '');
         $this->items[$index]['available_stock'] = number_format((float) $item->available_stock, 2, '.', '');
+        $this->items[$index]['item_image'] = (string) ($item->item_image ?? '');
         $this->items[$index]['description'] = $this->items[$index]['description'] ?: $item->item_name;
     }
 
@@ -431,7 +470,9 @@ trait ManagesSalesOrderForm
             'id' => null,
             'row_key' => $this->newItemRowKey(),
             'item_id' => '',
+            'item_image' => '',
             'description' => '',
+            'lead_time' => '',
             'order_quantity' => '1',
             'unit_measure_id' => '',
             'price' => '0.00',
@@ -456,5 +497,10 @@ trait ManagesSalesOrderForm
     private function newItemRowKey(): string
     {
         return 'so-row-'.(string) Str::uuid();
+    }
+
+    private function defaultRemarksTemplate(): string
+    {
+        return "*Notes\n\n    1. Items not included Packaging, Inventory\n    2. Advanced payment of 30% balance in one month\n    3. Minimum Quantity 2000, pieces.";
     }
 }

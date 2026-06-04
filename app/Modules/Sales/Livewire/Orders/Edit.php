@@ -17,7 +17,7 @@ class Edit extends Component
 
     public function mount(int $salesOrder): void
     {
-        $record = SalesOrder::query()->with('items')->find($salesOrder);
+        $record = SalesOrder::query()->with('items.item')->find($salesOrder);
         if (! $record) {
             $this->redirectRoute('sales.orders.index', navigate: false);
             return;

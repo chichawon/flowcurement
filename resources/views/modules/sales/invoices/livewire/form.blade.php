@@ -1,4 +1,4 @@
-<div class="space-y-5">
+<div class="space-y-5" x-data="{ imagePreviewOpen: false, imagePreviewUrl: '', imagePreviewTitle: '' }">
     <section class="erp-panel">
         <div class="erp-panel-header">
             <h3 class="text-base font-semibold text-slate-950">Invoice Details</h3>
@@ -60,9 +60,9 @@
                 <span class="text-sm font-medium text-slate-700">Contact No</span>
                 <input type="text" wire:model="contact_no" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm text-slate-700 shadow-sm">
             </label>
-            <label class="block md:col-span-2 xl:col-span-4">
+            <label class="block w-full" style="grid-column: 1 / -1;">
                 <span class="text-sm font-medium text-slate-700">Remarks</span>
-                <textarea wire:model.blur="remarks" rows="3" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring"></textarea>
+                <textarea wire:model.blur="remarks" rows="4" class="mt-1 block h-24 w-full rounded-md border-slate-300 px-3 py-2 text-sm leading-6 shadow-sm erp-focus-ring"></textarea>
             </label>
         </div>
     </section>
@@ -107,8 +107,25 @@
                     </thead>
                     <tbody class="bg-white">
                         @forelse ($items as $index => $row)
+                            @php
+                                $itemImageUrl = ! empty($row['item_image'] ?? null)
+                                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($row['item_image'])
+                                    : null;
+                                $itemName = $row['item_name'] ?? 'Item';
+                            @endphp
                             <tr>
-                                <td class="border border-slate-300 px-3 py-2 align-middle font-semibold text-slate-950">{{ $row['item_name'] ?? 'N/A' }}</td>
+                                <td class="border border-slate-300 px-3 py-2 align-middle font-semibold text-slate-950">
+                                    <div class="flex items-center gap-2">
+                                        @if ($itemImageUrl)
+                                            <button type="button" class="size-10 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white" @click="imagePreviewUrl = @js($itemImageUrl); imagePreviewTitle = @js($itemName); imagePreviewOpen = true">
+                                                <img src="{{ $itemImageUrl }}" alt="{{ $itemName }}" class="h-full w-full object-cover">
+                                            </button>
+                                        @else
+                                            <span class="grid size-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-xs font-bold text-slate-500">{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                        @endif
+                                        <span class="min-w-0 truncate">{{ $itemName }}</span>
+                                    </div>
+                                </td>
                                 <td class="border border-slate-300 px-3 py-2 align-middle">
                                     <input type="text" wire:model.blur="items.{{ $index }}.description" class="block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
                                 </td>
@@ -138,6 +155,17 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <div x-show="imagePreviewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4">
+            <div class="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                    <h4 class="text-sm font-semibold text-slate-950" x-text="imagePreviewTitle || 'Item Image'"></h4>
+                    <button type="button" @click="imagePreviewOpen = false" class="rounded-md px-2 py-1 text-sm font-semibold text-slate-500 hover:bg-slate-100">Close</button>
+                </div>
+                <div class="bg-slate-50 p-4">
+                    <img :src="imagePreviewUrl" alt="Item preview" class="mx-auto max-h-[32rem] max-w-full rounded-md object-contain">
+                </div>
             </div>
         </div>
     </section>

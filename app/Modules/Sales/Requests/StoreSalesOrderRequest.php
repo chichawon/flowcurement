@@ -36,6 +36,7 @@ class StoreSalesOrderRequest extends FormRequest
             'items.*.id' => ['nullable', 'integer', Rule::exists('sales_order_items', 'id')],
             'items.*.item_id' => ['required', Rule::exists('items', 'id')],
             'items.*.description' => ['nullable', 'string', 'max:1000'],
+            'items.*.lead_time' => ['nullable', 'string', 'max:255'],
             'items.*.order_quantity' => ['required', 'numeric', 'min:1'],
             'items.*.unit_measure_id' => ['required', Rule::exists('unit_measures', 'id')->where('status', 'active')],
             'items.*.price' => ['required', 'numeric', 'min:0'],

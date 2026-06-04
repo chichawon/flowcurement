@@ -1,4 +1,4 @@
-<form wire:submit.prevent="save" class="space-y-5">
+<form wire:submit.prevent="save" class="space-y-5" x-data="{ imagePreviewOpen: false, imagePreviewUrl: '', imagePreviewTitle: '' }">
     <section class="erp-panel">
         <div class="erp-panel-header flex items-center justify-between gap-3">
             <h3 class="text-sm font-semibold text-slate-950">{{ $title }}</h3>
@@ -42,7 +42,11 @@
                     </select>
                     @error('business_partner_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                 </label>
-                <x-admin.form-field label="Agent Name" name="agent_name" wire:model.blur="agent_name" required :disabled="$attachmentOnlyMode" />
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Agent Name <span class="text-red-600">*</span></span>
+                    <input type="text" wire:model="agent_name" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm text-slate-700 shadow-sm" @disabled($attachmentOnlyMode)>
+                    @error('agent_name') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                </label>
                 <x-admin.form-field label="Customer PO" name="customer_po" wire:model.blur="customer_po" :disabled="$attachmentOnlyMode" />
             </div>
 
@@ -67,7 +71,7 @@
 
             <label class="block">
                 <span class="text-sm font-medium text-slate-700">Remarks</span>
-                <input type="text" wire:model.blur="remarks" class="mt-1 block h-10 w-full rounded-md border-slate-300 px-3 text-sm shadow-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                <textarea wire:model.blur="remarks" rows="3" class="mt-1 block w-full rounded-md border-slate-300 px-3 py-2 text-sm shadow-sm erp-focus-ring" @disabled($attachmentOnlyMode)></textarea>
                 @error('remarks') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
             </label>
         </div>
@@ -184,9 +188,10 @@
             <div class="relative overflow-visible border border-slate-400 bg-white">
                 <table class="w-full table-fixed border-collapse text-sm">
                     <colgroup>
-                        <col class="w-[20%]">
                         <col class="w-[18%]">
-                        <col class="w-[10%]">
+                        <col class="w-[18%]">
+                        <col class="w-[12%]">
+                        <col class="w-[8%]">
                         <col class="w-[10%]">
                         <col class="w-[12%]">
                         <col class="w-[10%]">
@@ -197,6 +202,7 @@
                         <tr>
                             <th class="border border-slate-400 px-2 py-2 text-left">Item</th>
                             <th class="border border-slate-400 px-2 py-2 text-left">Description</th>
+                            <th class="border border-slate-400 px-2 py-2 text-left">Lead Time</th>
                             <th class="border border-slate-400 px-2 py-2 text-center">Qty</th>
                             <th class="border border-slate-400 px-2 py-2 text-left">Unit</th>
                             <th class="border border-slate-400 px-2 py-2 text-right">Price</th>
@@ -207,20 +213,39 @@
                     </thead>
                     <tbody>
                         @foreach ($items as $index => $row)
-                        @php($rowKey = $row['row_key'] ?? $row['_key'] ?? 'row-'.$index)
+                        @php
+                            $rowKey = $row['row_key'] ?? $row['_key'] ?? 'row-'.$index;
+                            $itemImageUrl = ! empty($row['item_image'] ?? null)
+                                ? \Illuminate\Support\Facades\Storage::disk('public')->url($row['item_image'])
+                                : null;
+                            $itemName = $availableItems->firstWhere('id', (int) ($row['item_id'] ?? 0))?->item_name ?? 'Item';
+                        @endphp
                         <tr wire:key="sales-order-item-row-{{ $rowKey }}">
                             <td class="border border-slate-300 p-2 align-top">
-                                <select wire:key="sales-order-item-select-{{ $rowKey }}-{{ $row['item_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.item_id" class="block h-9 w-full border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
-                                    <option value="">Select item</option>
-                                    @foreach ($availableItems as $item)
-                                    <option wire:key="sales-order-item-option-{{ $rowKey }}-{{ $item->id }}" value="{{ $item->id }}">{{ $item->item_name }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="flex items-center gap-2">
+                                    @if ($itemImageUrl)
+                                        <button type="button" class="size-10 shrink-0 overflow-hidden rounded-md border border-slate-200 bg-white" @click="imagePreviewUrl = @js($itemImageUrl); imagePreviewTitle = @js($itemName); imagePreviewOpen = true">
+                                            <img src="{{ $itemImageUrl }}" alt="{{ $itemName }}" class="h-full w-full object-cover">
+                                        </button>
+                                    @else
+                                        <span class="grid size-10 shrink-0 place-items-center rounded-md border border-slate-200 bg-slate-100 text-xs font-bold text-slate-500">{{ strtoupper(substr($itemName, 0, 1)) }}</span>
+                                    @endif
+                                    <select wire:key="sales-order-item-select-{{ $rowKey }}-{{ $row['item_id'] ?? 'empty' }}" wire:model.live="items.{{ $index }}.item_id" class="block h-9 min-w-0 flex-1 border border-slate-400 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
+                                        <option value="">Select item</option>
+                                        @foreach ($availableItems as $item)
+                                        <option wire:key="sales-order-item-option-{{ $rowKey }}-{{ $item->id }}" value="{{ $item->id }}">{{ $item->item_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 @error('items.'.$index.'.item_id') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                             </td>
                             <td class="border border-slate-300 p-2 align-top">
                                 <input type="text" wire:model.blur="items.{{ $index }}.description" class="block h-9 w-full border border-slate-400 px-2 text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
                                 @error('items.'.$index.'.description') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="border border-slate-300 p-2 align-top">
+                                <input type="text" wire:model.blur="items.{{ $index }}.lead_time" class="block h-9 w-full border border-slate-400 px-2 text-sm erp-focus-ring" placeholder="e.g. 7 days" @disabled($attachmentOnlyMode)>
+                                @error('items.'.$index.'.lead_time') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
                             </td>
                             <td class="border border-slate-300 p-2 align-top">
                                 <input type="number" wire:model.live.debounce.250ms="items.{{ $index }}.order_quantity" min="1" step="1" class="block h-9 w-full border border-slate-400 px-2 text-center text-sm erp-focus-ring" @disabled($attachmentOnlyMode)>
@@ -258,6 +283,17 @@
                 </table>
             </div>
             @error('items') <span class="mt-2 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+        </div>
+        <div x-show="imagePreviewOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4">
+            <div class="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                    <h4 class="text-sm font-semibold text-slate-950" x-text="imagePreviewTitle || 'Item Image'"></h4>
+                    <button type="button" @click="imagePreviewOpen = false" class="rounded-md px-2 py-1 text-sm font-semibold text-slate-500 hover:bg-slate-100">Close</button>
+                </div>
+                <div class="bg-slate-50 p-4">
+                    <img :src="imagePreviewUrl" alt="Item preview" class="mx-auto max-h-[32rem] max-w-full rounded-md object-contain">
+                </div>
+            </div>
         </div>
     </section>
 
@@ -310,8 +346,27 @@
         <button type="submit" class="rounded-md bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm erp-focus-ring hover:bg-slate-800">{{ $submitLabel }}</button>
     </div>
 
-    <div x-data="{ open: @entangle('showQuickItemModal').live }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-slate-950/60" @click="$wire.closeQuickItemModal()"></div>
+    <div
+        x-data="{
+            open: @entangle('showQuickItemModal').live,
+            previewUrl: '',
+            setPreview(event) {
+                if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+                const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+                this.previewUrl = file ? URL.createObjectURL(file) : '';
+            },
+            clearPreview() {
+                if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
+                this.previewUrl = '';
+                this.previewOpen = false;
+            },
+            previewOpen: false,
+        }"
+        x-show="open"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center px-4"
+    >
+        <div class="absolute inset-0 bg-slate-950/60" @click="clearPreview(); $wire.closeQuickItemModal()"></div>
         <div class="relative w-full max-w-lg rounded-xl bg-white shadow-2xl">
             <div class="border-b border-slate-200 px-5 py-4">
                 <h3 class="text-base font-semibold text-slate-950">Add New Item</h3>
@@ -322,13 +377,33 @@
                     <option value="import">Imported</option>
                 </x-admin.select-field>
                 <x-admin.form-field label="Item Name" name="quick_item_name" wire:model.blur="quick_item_name" />
+                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_6rem] sm:items-end">
+                    <label class="block">
+                        <span class="text-sm font-medium text-slate-700">Item Image</span>
+                        <input type="file" wire:model="quick_item_image_upload" accept="image/*" class="mt-1 block w-full rounded-md border border-slate-300 text-sm text-slate-700 shadow-sm file:mr-3 file:border-0 file:bg-slate-950 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800 erp-focus-ring" @change="setPreview($event)">
+                        @error('quick_item_image_upload') <span class="mt-1 block text-xs font-medium text-red-600">{{ $message }}</span> @enderror
+                        <span wire:loading wire:target="quick_item_image_upload" class="mt-1 block text-xs font-semibold text-cyan-700">Uploading image...</span>
+                    </label>
+                    <button type="button" x-bind:disabled="! previewUrl" @click="previewOpen = true" class="inline-flex h-10 items-center justify-center rounded-md border border-cyan-200 bg-cyan-50 px-3 text-sm font-semibold text-cyan-800 shadow-sm hover:bg-cyan-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">Preview</button>
+                </div>
                 <div class="grid gap-3 sm:grid-cols-3">
                     <x-admin.form-field label="Supplier Price" name="quick_supplier_price" type="number" step="0.01" wire:model.live="quick_supplier_price" />
                     <x-admin.form-field label="Markup %" name="quick_markup_percentage" type="number" step="0.01" wire:model.live="quick_markup_percentage" />
                     <label class="block"><span class="text-sm font-medium text-slate-700">Item Price</span><input type="text" value="{{ $quick_item_price }}" readonly class="mt-1 block h-10 w-full rounded-md border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-950 shadow-sm"></label>
                 </div>
             </div>
-            <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4"><button type="button" wire:click="closeQuickItemModal" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Cancel</button><button type="button" wire:click="createQuickItem" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Add Item</button></div>
+            <div class="flex justify-end gap-2 border-t border-slate-200 px-5 py-4"><button type="button" @click="clearPreview(); $wire.closeQuickItemModal()" class="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Cancel</button><button type="button" wire:click="createQuickItem" class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-700">Add Item</button></div>
+        </div>
+        <div x-show="previewOpen" x-cloak class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-slate-950/40 px-4">
+            <div class="w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                    <h4 class="text-sm font-semibold text-slate-950">Item Image Preview</h4>
+                    <button type="button" @click="previewOpen = false" class="rounded-md px-2 py-1 text-sm font-semibold text-slate-500 hover:bg-slate-100">Close</button>
+                </div>
+                <div class="bg-slate-50 p-4">
+                    <img :src="previewUrl" alt="Item preview" class="mx-auto max-h-72 max-w-full rounded-md object-contain">
+                </div>
+            </div>
         </div>
     </div>
 

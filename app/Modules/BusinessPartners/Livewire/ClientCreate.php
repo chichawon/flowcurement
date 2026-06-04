@@ -32,6 +32,7 @@ class ClientCreate extends Component
             'title' => 'Create Client',
             'submitLabel' => 'Create Client',
             'cancelRoute' => route('clients.index'),
+            'partnerType' => $this->partnerType(),
         ]);
     }
 }

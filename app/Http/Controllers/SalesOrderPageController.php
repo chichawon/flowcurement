@@ -25,7 +25,7 @@ class SalesOrderPageController extends Controller
             'businessPartner:id,company_name,type',
             'quotation:id,quotation_no',
             'creator:id,name',
-            'items.item:id,item_name,item_code',
+            'items.item:id,item_name,item_code,item_image',
             'items.unitMeasure:id,name',
         ])->find($salesOrder);
 

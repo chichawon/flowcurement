@@ -42,6 +42,7 @@ class SupplierEdit extends Component
             'title' => 'Edit Supplier',
             'submitLabel' => 'Save Supplier',
             'cancelRoute' => route('suppliers.index'),
+            'partnerType' => $this->partnerType(),
         ]);
     }
 }
