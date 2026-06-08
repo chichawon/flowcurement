@@ -20,16 +20,14 @@ class QuotationService
 {
     private const MODULE = 'quotations';
 
-    public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    public function paginate(array $filters = [], int $perPage = 10, array $expandedIds = []): LengthAwarePaginator
     {
-        return Quotation::query()
+        $paginator = Quotation::query()
             ->with([
                 'businessPartner:id,company_name,type,contact_no',
                 'preparedBy:id,name',
-                'items:id,quotation_id,item_id,description,lead_time,unit_measure_id,item_price,quantity,total',
-                'items.item:id,item_name,item_image',
-                'items.unitMeasure:id,name',
             ])
+            ->withCount('items')
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('quotation_no', 'like', "%{$search}%")
@@ -41,6 +39,19 @@ class QuotationService
             ->when($filters['date_to'] ?? null, fn (Builder $query, string $date) => $query->whereDate('quotation_date', '<=', $date))
             ->latest('id')
             ->paginate($perPage);
+
+        $expandedIds = collect($expandedIds)->map(fn ($id): int => (int) $id)->filter()->values()->all();
+        if ($expandedIds !== []) {
+            $paginator->getCollection()
+                ->whereIn('id', $expandedIds)
+                ->load([
+                    'items:id,quotation_id,item_id,description,lead_time,unit_measure_id,item_price,quantity,total',
+                    'items.item:id,item_name,item_image',
+                    'items.unitMeasure:id,name',
+                ]);
+        }
+
+        return $paginator;
     }
 
     public function nextQuotationNo(): string

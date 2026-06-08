@@ -113,7 +113,7 @@
                                 <td class="px-3 py-3 align-middle">
                                     <button type="button" wire:click="toggleItemsRow({{ $quotation->id }})" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                         <span>{{ in_array($quotation->id, $expandedQuotationRows, true) ? 'Hide' : 'View' }}</span>
-                                        <span class="ml-1.5">({{ $quotation->items->count() }})</span>
+                                        <span class="ml-1.5">({{ $quotation->items_count ?? 0 }})</span>
                                     </button>
                                 </td>
                                 <td class="px-3 py-3 align-middle">

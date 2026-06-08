@@ -189,7 +189,7 @@
                                 <td class="px-3 py-3 text-center align-middle">
                                     <button type="button" wire:click="toggleItemsDetails({{ $salesOrder->id }})" class="inline-flex items-center rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                                         <span>{{ in_array($salesOrder->id, $expandedRows, true) ? 'Hide' : 'View' }}</span>
-                                        <span class="ml-1.5">({{ $salesOrder->items->count() }})</span>
+                                        <span class="ml-1.5">({{ $salesOrder->items_count ?? 0 }})</span>
                                     </button>
                                 </td>
                                 <td class="px-3 py-3 text-right align-middle">

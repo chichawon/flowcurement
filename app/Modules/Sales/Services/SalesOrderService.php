@@ -24,11 +24,31 @@ class SalesOrderService
     private const MODULE = 'sales-orders';
     public const MAX_NO_OF_DAYS = 3650;
 
-    public function paginate(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    public function paginate(array $filters = [], int $perPage = 10, array $expandedIds = []): LengthAwarePaginator
     {
-        return $this->filteredQuery($filters)
+        $paginator = $this->filteredQuery($filters)
+            ->with([
+                'businessPartner:id,company_name,type',
+                'creator:id,name',
+            ])
+            ->withCount('items')
             ->latest('id')
             ->paginate($perPage);
+
+        $expandedIds = collect($expandedIds)->map(fn ($id): int => (int) $id)->filter()->values()->all();
+        if ($expandedIds !== []) {
+            $paginator->getCollection()
+                ->whereIn('id', $expandedIds)
+                ->load([
+                    'items:id,sales_order_id,item_id,lead_time,unit_measure_id,order_quantity,balance_quantity,total',
+                    'items.item:id,item_name,item_image',
+                    'items.unitMeasure:id,name',
+                    'items.deliveryReceiptItems:id,delivery_receipt_id,sales_order_item_id,delivered_quantity,delivery_no,delivered_date,delivered_by,received_by',
+                    'items.deliveryReceiptItems.deliveryReceipt:id,delivery_receipt_no,status,dr_date,received_date,received_by,delivered_by',
+                ]);
+        }
+
+        return $paginator;
     }
 
     public function statusCounts(array $filters = []): array
@@ -339,15 +359,6 @@ class SalesOrderService
     private function filteredQuery(array $filters = []): Builder
     {
         return SalesOrder::query()
-            ->with([
-                'businessPartner:id,company_name,type',
-                'creator:id,name',
-                'items:id,sales_order_id,item_id,lead_time,unit_measure_id,order_quantity,balance_quantity,total',
-                'items.item:id,item_name,item_image',
-                'items.unitMeasure:id,name',
-                'items.deliveryReceiptItems:id,delivery_receipt_id,sales_order_item_id,delivered_quantity,delivery_no,delivered_date,delivered_by,received_by',
-                'items.deliveryReceiptItems.deliveryReceipt:id,delivery_receipt_no,status,dr_date,received_date,received_by,delivered_by',
-            ])
             ->when($filters['search'] ?? null, function (Builder $query, string $search): void {
                 $query->where(function (Builder $query) use ($search): void {
                     $query->where('sales_order_no', 'like', "%{$search}%")

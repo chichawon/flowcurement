@@ -18,6 +18,8 @@ Route::get('/', HomeController::class)->name('login');
 Route::get('/login', HomeController::class);
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('/system/heartbeat', fn () => response()->noContent())->name('system.heartbeat');
+
     Route::get('/dashboard', DashboardController::class)->middleware(['permission:dashboard.view'])->name('dashboard');
 
     Route::prefix('user-management')

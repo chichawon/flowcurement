@@ -118,7 +118,7 @@ class QuotationsIndex extends Component
                 'currency' => $this->currency,
                 'date_from' => $this->date_from,
                 'date_to' => $this->date_to,
-            ], $this->perPage),
+            ], $this->perPage, $this->expandedQuotationRows),
         ]);
     }
 }

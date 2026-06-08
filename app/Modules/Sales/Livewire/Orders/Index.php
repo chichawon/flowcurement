@@ -109,7 +109,7 @@ class Index extends Component
         ];
 
         return view('modules.sales.orders.livewire.index', [
-            'salesOrders' => $service->paginate($filters, $this->perPage),
+            'salesOrders' => $service->paginate($filters, $this->perPage, $this->expandedRows),
             'statusCounts' => $service->statusCounts($filters),
         ]);
     }

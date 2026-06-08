@@ -7,9 +7,6 @@
 
         <title>{{ config('app.name', 'Flowcurement') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
@@ -36,5 +33,24 @@
         </div>
 
         @livewireScripts
+        @auth
+            <script>
+                (() => {
+                    const url = @json(route('system.heartbeat'));
+                    const ping = () => {
+                        if (document.visibilityState !== 'visible') return;
+                        fetch(url, {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            cache: 'no-store',
+                        }).catch(() => {});
+                    };
+
+                    window.setInterval(ping, 120000);
+                    document.addEventListener('visibilitychange', ping);
+                })();
+            </script>
+        @endauth
     </body>
 </html>

@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,6 +64,13 @@ class ItemService
      */
     public function suppliers(?string $search = null): Collection
     {
+        if (blank($search)) {
+            return Cache::remember('items.suppliers', now()->addMinute(), fn (): Collection => BusinessPartner::query()
+                ->suppliers()
+                ->orderBy('company_name')
+                ->get(['id', 'company_name', 'company_code']));
+        }
+
         return BusinessPartner::query()
             ->suppliers()
             ->when($search, function (Builder $query, string $search): void {
@@ -80,10 +88,10 @@ class ItemService
      */
     public function itemTypes(): Collection
     {
-        return ItemType::query()
+        return Cache::remember('items.item_types', now()->addHour(), fn (): Collection => ItemType::query()
             ->where('status', 'active')
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name']));
     }
 
     public function createItemType(string $name): ItemType
@@ -104,6 +112,7 @@ class ItemService
                 $itemType->getAttributes(),
                 'Item type created: '.$itemType->name
             );
+            Cache::forget('items.item_types');
 
             return $itemType;
         });
