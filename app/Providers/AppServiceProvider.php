@@ -38,6 +38,8 @@ use App\Modules\Sales\Livewire\DeliveryReceipts\UploadDetails as DeliveryReceipt
 use App\Modules\Sales\Livewire\Invoices\Create as SalesInvoiceCreate;
 use App\Modules\Sales\Livewire\Invoices\Edit as SalesInvoiceEdit;
 use App\Modules\Sales\Livewire\Invoices\Index as SalesInvoiceIndex;
+use App\Modules\Sales\Livewire\Collections\Create as SalesCollectionCreate;
+use App\Modules\Sales\Livewire\Collections\Index as SalesCollectionIndex;
 use App\Modules\Sales\Models\DeliveryReceipt;
 use App\Modules\Sales\Models\SalesInvoice;
 use App\Modules\Sales\Models\SalesOrder;
@@ -106,6 +108,8 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('sales.invoices.index', SalesInvoiceIndex::class);
         Livewire::component('sales.invoices.create', SalesInvoiceCreate::class);
         Livewire::component('sales.invoices.edit', SalesInvoiceEdit::class);
+        Livewire::component('sales.collections.index', SalesCollectionIndex::class);
+        Livewire::component('sales.collections.create', SalesCollectionCreate::class);
         Livewire::component('user-management.users-index', UsersIndex::class);
 
         $this->app->booted(function (): void {

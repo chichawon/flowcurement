@@ -37,13 +37,13 @@
             'label' => 'Sales',
             'permission' => 'dashboard.view',
             'visible' => $canAnySalesMenu,
-            'active' => request()->routeIs('sales.orders.*') || request()->routeIs('sales.delivery-receipts.*') || request()->routeIs('sales.invoices.*'),
+            'active' => request()->routeIs('sales.orders.*') || request()->routeIs('sales.delivery-receipts.*') || request()->routeIs('sales.invoices.*') || request()->routeIs('sales.collections.*'),
             'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.63-1.163m0 0-5.25-.875m5.25.875-.875 5.25',
             'children' => [
                 ['label' => 'Order', 'permission' => 'sales-orders.view', 'url' => route('sales.orders.index'), 'active' => request()->routeIs('sales.orders.*')],
                 ['label' => 'Delivery Receipt', 'permission' => 'delivery-receipts.view', 'url' => route('sales.delivery-receipts.index'), 'active' => request()->routeIs('sales.delivery-receipts.*')],
                 ['label' => 'Invoice', 'permission' => 'sales-invoices.view', 'url' => route('sales.invoices.index'), 'active' => request()->routeIs('sales.invoices.*')],
-                ['label' => 'Collection', 'permission' => 'sales-collections.view', 'url' => '#', 'active' => false],
+                ['label' => 'Collection', 'permission' => 'sales-collections.view', 'url' => route('sales.collections.index'), 'active' => request()->routeIs('sales.collections.*')],
             ],
         ],
      

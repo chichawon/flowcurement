@@ -31,6 +31,7 @@ class Edit extends Component
     public string $contact_no = '';
     public string $currency = 'php';
     public string $tax_rate = '0';
+    public string $withholding_tax_rate = '0';
     public string $remarks = '';
     public array $items = [];
     public array $totals = ['subtotal' => 0, 'tax_amount' => 0, 'withholding_tax_amount' => 0, 'total_amount' => 0, 'balance_amount' => 0];
@@ -104,6 +105,7 @@ class Edit extends Component
         $this->business_partner_id = (string) $invoice->business_partner_id;
         $this->terms = (string) $invoice->terms;
         $this->tax_rate = (string) (int) $invoice->tax_rate;
+        $this->withholding_tax_rate = (string) (int) $invoice->withholding_tax_rate;
         $this->items = $invoice->items->map(fn ($item): array => [
             'delivery_receipt_id' => $item->delivery_receipt_id,
             'delivery_receipt_item_id' => $item->delivery_receipt_item_id,
@@ -176,7 +178,7 @@ class Edit extends Component
             'contact_no' => $this->contact_no,
             'currency' => $this->currency,
             'tax_rate' => $this->tax_rate,
-            'withholding_tax_rate' => '0',
+            'withholding_tax_rate' => $this->withholding_tax_rate,
             'status' => $this->invoice->status,
             'remarks' => $this->remarks,
             'items' => $this->items,

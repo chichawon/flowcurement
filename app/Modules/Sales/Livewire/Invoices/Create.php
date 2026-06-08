@@ -29,6 +29,7 @@ class Create extends Component
     public string $contact_no = '';
     public string $currency = 'php';
     public string $tax_rate = '0';
+    public string $withholding_tax_rate = '0';
     public string $remarks = '';
     public array $items = [];
     public array $totals = ['subtotal' => 0, 'tax_amount' => 0, 'withholding_tax_amount' => 0, 'total_amount' => 0, 'balance_amount' => 0];
@@ -156,7 +157,7 @@ class Create extends Component
             'contact_no' => $this->contact_no,
             'currency' => $this->currency,
             'tax_rate' => $this->tax_rate,
-            'withholding_tax_rate' => '0',
+            'withholding_tax_rate' => $this->withholding_tax_rate,
             'status' => 'unpaid',
             'remarks' => $this->remarks,
             'items' => $this->items,

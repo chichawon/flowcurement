@@ -8,6 +8,7 @@ use App\Http\Controllers\ItemPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationPageController;
 use App\Http\Controllers\SalesInvoicePageController;
+use App\Http\Controllers\SalesCollectionPageController;
 use App\Http\Controllers\SalesOrderPageController;
 use App\Modules\UserManagement\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -117,6 +118,14 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/{salesInvoice}/print', [SalesInvoicePageController::class, 'print'])->middleware('permission:sales-invoices.print')->name('print');
             Route::get('/{salesInvoice}', [SalesInvoicePageController::class, 'show'])->name('show');
             Route::get('/{salesInvoice}/edit', [SalesInvoicePageController::class, 'edit'])->middleware('permission:sales-invoices.update')->name('edit');
+        });
+
+    Route::prefix('sales/collections')
+        ->name('sales.collections.')
+        ->middleware(['permission:sales-collections.view'])
+        ->group(function (): void {
+            Route::get('/', [SalesCollectionPageController::class, 'index'])->name('index');
+            Route::get('/create', [SalesCollectionPageController::class, 'create'])->middleware('permission:sales-collections.create')->name('create');
         });
 });
 
