@@ -23,7 +23,6 @@
                     <select wire:model.live="status" class="mt-1 block w-full rounded-md border-slate-300 text-sm shadow-sm erp-focus-ring">
                         <option value="">All statuses</option>
                         <option value="pending">Pending</option>
-                        <option value="posted">Posted</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
                 </label>
@@ -73,21 +72,58 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 bg-white">
-                        <tr>
-                            <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">
-                                No sales collections found.
-                            </td>
-                        </tr>
+                        @forelse ($collections as $collection)
+                            <tr>
+                                <td class="px-3 py-3 text-center align-middle">
+                                    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm" title="Actions">
+                                        <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path d="M10 3.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" />
+                                        </svg>
+                                    </button>
+                                </td>
+                                <td class="px-3 py-3 align-middle">
+                                    <p class="font-semibold text-slate-950">{{ $collection->collection_no }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-500">{{ $collection->collection_receipt_no }}</p>
+                                </td>
+                                <td class="px-3 py-3 text-center align-middle text-slate-700">{{ $collection->collection_receipt_date?->format('M d, Y') }}</td>
+                                <td class="px-3 py-3 align-middle text-slate-700">
+                                    {{ $collection->invoices->pluck('sales_invoice_no')->take(2)->join(', ') ?: '-' }}
+                                    @if ($collection->invoices->count() > 2)
+                                        <span class="text-xs text-slate-500">+{{ $collection->invoices->count() - 2 }} more</span>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-3 align-middle text-slate-700">{{ $collection->company_name }}</td>
+                                <td class="px-3 py-3 align-middle text-slate-700">
+                                    <p>{{ $collection->bank_name ?: '-' }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-500">Check No: {{ $collection->check_number }}</p>
+                                </td>
+                                <td class="px-3 py-3 text-right align-middle font-semibold text-slate-950">{{ number_format((float) $collection->applied_amount, 2) }}</td>
+                                <td class="px-3 py-3 text-center align-middle">
+                                    @php
+                                        $statusClass = $collection->status === 'cancelled' ? 'bg-red-600' : 'bg-amber-600';
+                                    @endphp
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold text-white {{ $statusClass }}">{{ str($collection->status)->headline() }}</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">
+                                    No sales collections found.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
             <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-slate-500">Showing <span class="font-semibold text-slate-700">0</span> to <span class="font-semibold text-slate-700">0</span> of <span class="font-semibold text-slate-700">0</span> records</p>
+                <p class="text-slate-500">
+                    Showing <span class="font-semibold text-slate-700">{{ $collections->firstItem() ?? 0 }}</span>
+                    to <span class="font-semibold text-slate-700">{{ $collections->lastItem() ?? 0 }}</span>
+                    of <span class="font-semibold text-slate-700">{{ $collections->total() }}</span> records
+                </p>
                 <div class="flex flex-wrap items-center gap-1">
-                    <button type="button" disabled class="inline-flex min-h-9 cursor-not-allowed items-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-400">Previous</button>
-                    <button type="button" disabled class="inline-flex size-9 cursor-not-allowed items-center justify-center rounded-md border border-slate-300 bg-white text-sm font-semibold text-slate-400">1</button>
-                    <button type="button" disabled class="inline-flex min-h-9 cursor-not-allowed items-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-400">Next</button>
+                    {{ $collections->links() }}
                 </div>
             </div>
         </div>

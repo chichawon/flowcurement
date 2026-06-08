@@ -2,6 +2,7 @@
 
 namespace App\Modules\Sales\Livewire\Collections;
 
+use App\Modules\Sales\Services\SalesCollectionService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,8 +31,15 @@ class Index extends Component
 
     public function render()
     {
+        $filters = [
+            'search' => $this->search,
+            'status' => $this->status,
+            'date_from' => $this->date_from,
+            'date_to' => $this->date_to,
+        ];
+
         return view('modules.sales.collections.livewire.index', [
-            'collections' => collect(),
+            'collections' => app(SalesCollectionService::class)->paginate($filters, $this->perPage),
         ]);
     }
 }
