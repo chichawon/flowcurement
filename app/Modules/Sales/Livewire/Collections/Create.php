@@ -95,7 +95,10 @@ class Create extends Component
     {
         $clients = $this->clientsWithUnpaidInvoices();
         $invoices = $this->unpaidInvoices();
-        $selectedInvoices = $this->selectedInvoices();
+        $selectedIds = collect($this->selected_invoice_ids)->map(fn ($id): int => (int) $id)->all();
+        $selectedInvoices = $selectedIds === []
+            ? collect()
+            : $invoices->whereIn('id', $selectedIds)->values();
 
         return view('modules.sales.collections.livewire.create', [
             'clients' => $clients,

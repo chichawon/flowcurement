@@ -14,6 +14,7 @@ use App\Modules\Sales\Models\DeliveryReceiptItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -191,6 +192,7 @@ class SalesOrderService
             ]);
 
             app(AuditTrailService::class)->record(self::MODULE, 'quick_item_created', $item, null, $item->getAttributes(), 'Item created from sales order: '.$item->item_name);
+            Cache::forget('sales.orders.active_items');
 
             return $item;
         });
@@ -228,17 +230,17 @@ class SalesOrderService
 
     public function clients(): Collection
     {
-        return BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'terms', 'company_address', 'contact_person', 'contact_no', 'agent_name']);
+        return Cache::remember('sales.orders.clients', now()->addMinute(), fn (): Collection => BusinessPartner::query()->clients()->where('status', 'active')->orderBy('company_name')->get(['id', 'company_name', 'terms', 'company_address', 'contact_person', 'contact_no', 'agent_name']));
     }
 
     public function activeItems(): Collection
     {
-        return Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price', 'available_stock', 'item_image']);
+        return Cache::remember('sales.orders.active_items', now()->addMinute(), fn (): Collection => Item::query()->where('status', 'active')->orderBy('item_name')->get(['id', 'item_name', 'item_code', 'item_price', 'available_stock', 'item_image']));
     }
 
     public function unitMeasures(): Collection
     {
-        return UnitMeasure::query()->where('status', 'active')->orderBy('name')->get(['id', 'name']);
+        return Cache::remember('sales.orders.unit_measures', now()->addHour(), fn (): Collection => UnitMeasure::query()->where('status', 'active')->orderBy('name')->get(['id', 'name']));
     }
 
     public function sourceQuotations(?int $currentQuotationId = null): Collection
