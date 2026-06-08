@@ -200,19 +200,9 @@ class SalesOrderService
 
     public function quotationRows(Quotation $quotation): array
     {
-        $quotation->load(['businessPartner', 'items.item:id,item_name,item_code,item_price,available_stock,item_image', 'items.unitMeasure']);
+        $quotation->load(['items.item:id,item_name,item_code,item_price,available_stock,item_image', 'items.unitMeasure']);
 
         return [
-            'customer' => [
-                'business_partner_id' => (string) $quotation->business_partner_id,
-                'terms' => (int) ($quotation->businessPartner?->terms ?? 30),
-                'agent_name' => (string) $quotation->agent_name,
-                'company_address' => (string) $quotation->company_address,
-                'contact_person' => (string) $quotation->contact_person,
-                'contact_no' => (string) $quotation->contact_no,
-                'quotation_id' => (string) $quotation->id,
-                'currency' => $quotation->currency,
-            ],
             'items' => $quotation->items->map(fn ($row): array => [
                 'item_id' => (string) $row->item_id,
                 'item_image' => (string) ($row->item?->item_image ?? ''),

@@ -316,9 +316,6 @@ trait ManagesSalesOrderForm
         }
 
         $loaded = app(SalesOrderService::class)->quotationRows($quotation);
-        foreach ($loaded['customer'] as $key => $value) {
-            $this->{$key} = $value;
-        }
         $this->items = collect($loaded['items'])
             ->map(fn (array $row): array => ['id' => null, 'row_key' => $this->newItemRowKey()] + $row)
             ->values()
