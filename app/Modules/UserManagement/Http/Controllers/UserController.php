@@ -128,17 +128,22 @@ class UserController extends Controller
             'delivery-receipts' => 'Sales / D.R',
             'sales-invoices' => 'Sales / Invoice',
             'sales-collections' => 'Sales / Collection',
+            'purchase-orders' => 'Purchasing / Purchase Order',
+            'purchase-invoices' => 'Purchasing / Purchase Invoice',
         ];
 
         $orderedLabels = [
+            'Business Partners',
+            'Items',
+            'Quotations',
+            'Purchasing',
+            'Purchasing / Purchase Order',
+            'Purchasing / Purchase Invoice',
             'Sales',
             'Sales / Order',
             'Sales / D.R',
             'Sales / Invoice',
             'Sales / Collection',
-            'Business Partners',
-            'Items',
-            'Quotations',
         ];
 
         $grouped = $permissions

@@ -69,7 +69,7 @@
         @php
             $tabGroups = collect();
             foreach ($permissions as $group => $groupPermissions) {
-                $tab = str_starts_with($group, 'Sales /') ? 'Sales' : $group;
+                $tab = str_starts_with($group, 'Sales /') ? 'Sales' : (str_starts_with($group, 'Purchasing /') ? 'Purchasing' : $group);
                 if (! $tabGroups->has($tab)) {
                     $tabGroups->put($tab, collect());
                 }
@@ -100,7 +100,7 @@
                         @foreach ($orderedTabKeys as $tabName)
                             <button
                                 type="button"
-                                @click="permTab = '{{ $tabName }}'"
+                                x-on:click="permTab = '{{ $tabName }}'"
                                 :class="permTab === '{{ $tabName }}' ? 'z-10 bg-cyan-600 text-white border-cyan-600 shadow-sm' : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 hover:text-slate-900'"
                                 class="relative -mb-px inline-flex h-9 shrink-0 items-center justify-center rounded-t-lg border px-2 text-xs font-semibold whitespace-nowrap transition"
                                 style="width: 7.50rem; min-width: 7.50rem; max-width: 7.50rem;"
@@ -113,9 +113,19 @@
 
                 <div class="max-h-[38rem] overflow-y-auto pr-1">
                     @foreach ($orderedTabKeys as $tabName)
-                        @php($groupSet = $tabGroups->get($tabName))
+                        @php
+                            $groupSet = $tabGroups->get($tabName);
+                        @endphp
                         <div x-show="permTab === '{{ $tabName }}'" x-cloak class="grid gap-3 xl:grid-cols-2">
                             @foreach ($groupSet as $group => $groupPermissions)
+                                @php
+                                    $groupTitle = $group;
+                                    if (str_starts_with($group, 'Sales /')) {
+                                        $groupTitle = str($group)->after('Sales /')->replace('Order', 'Sales Order')->replace('Invoice', 'Sales Invoice')->replace('Collection', 'Sales Collection')->value();
+                                    } elseif (str_starts_with($group, 'Purchasing /')) {
+                                        $groupTitle = str($group)->after('Purchasing /')->value();
+                                    }
+                                @endphp
                                 <div
                                     class="rounded-lg border border-slate-200 bg-white shadow-sm"
                                     x-data="{
@@ -132,19 +142,19 @@
                                 >
                                     <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2">
                                         <p class="text-xs font-semibold uppercase text-slate-600">
-                                            {{ str_starts_with($group, 'Sales /') ? str($group)->after('Sales /')->replace('Order', 'Sales Order')->replace('Invoice', 'Sales Invoice')->replace('Collection', 'Sales Collection') : $group }}
+                                            {{ $groupTitle }}
                                         </p>
                                         <label class="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-slate-600">
                                             <input
                                                 type="checkbox"
                                                 x-model="allChecked"
-                                                @change="toggleAll()"
+                                                x-on:change="toggleAll()"
                                                 class="size-3.5 rounded border-slate-300 text-cyan-600 erp-focus-ring"
                                             >
                                             <span>Check all</span>
                                         </label>
                                     </div>
-                                    <div x-ref="permissions" @change="sync()" class="grid gap-x-8 gap-y-4 px-4 py-4 sm:grid-cols-2">
+                                    <div x-ref="permissions" x-on:change="sync()" class="grid gap-x-8 gap-y-4 px-4 py-4 sm:grid-cols-2">
                                         @foreach ($groupPermissions as $permission)
                                             <label class="flex min-h-8 items-center gap-3 text-sm leading-5 text-slate-700">
                                                 <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" @checked(in_array($permission->name, $selectedPermissions, true)) class="size-4 shrink-0 rounded border-slate-300 text-cyan-600 erp-focus-ring">

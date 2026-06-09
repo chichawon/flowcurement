@@ -6,6 +6,8 @@ use App\Modules\UserManagement\Helpers\UserManagementPermissions;
 use App\Modules\BusinessPartners\Helpers\BusinessPartnerPermissions;
 use App\Modules\Items\Helpers\ItemPermissions;
 use App\Modules\Quotations\Helpers\QuotationPermissions;
+use App\Modules\Purchasing\Helpers\PurchaseInvoicePermissions;
+use App\Modules\Purchasing\Helpers\PurchaseOrderPermissions;
 use App\Modules\Sales\Helpers\DeliveryReceiptPermissions;
 use App\Modules\Sales\Helpers\SalesInvoicePermissions;
 use App\Modules\Sales\Helpers\SalesOrderPermissions;
@@ -85,6 +87,20 @@ class PermissionSeeder extends Seeder
         }
 
         foreach (SalesInvoicePermissions::all() as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        foreach (PurchaseOrderPermissions::all() as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        foreach (PurchaseInvoicePermissions::all() as $permission) {
             Permission::firstOrCreate([
                 'name' => $permission,
                 'guard_name' => 'web',

@@ -6,6 +6,8 @@ use App\Http\Controllers\DeliveryReceiptPageController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemPageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchaseInvoicePageController;
+use App\Http\Controllers\PurchaseOrderPageController;
 use App\Http\Controllers\QuotationPageController;
 use App\Http\Controllers\SalesInvoicePageController;
 use App\Http\Controllers\SalesCollectionPageController;
@@ -129,6 +131,28 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         ->group(function (): void {
             Route::get('/', [SalesCollectionPageController::class, 'index'])->name('index');
             Route::get('/create', [SalesCollectionPageController::class, 'create'])->middleware('permission:sales-collections.create')->name('create');
+        });
+
+    Route::prefix('purchasing/orders')
+        ->name('purchasing.orders.')
+        ->middleware(['permission:purchase-orders.view'])
+        ->group(function (): void {
+            Route::get('/', [PurchaseOrderPageController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseOrderPageController::class, 'create'])->middleware('permission:purchase-orders.create')->name('create');
+            Route::get('/{purchaseOrder}/print', [PurchaseOrderPageController::class, 'print'])->middleware('permission:purchase-orders.print')->name('print');
+            Route::get('/{purchaseOrder}', [PurchaseOrderPageController::class, 'show'])->name('show');
+            Route::get('/{purchaseOrder}/edit', [PurchaseOrderPageController::class, 'edit'])->middleware('permission:purchase-orders.update')->name('edit');
+        });
+
+    Route::prefix('purchasing/invoices')
+        ->name('purchasing.invoices.')
+        ->middleware(['permission:purchase-invoices.view'])
+        ->group(function (): void {
+            Route::get('/', [PurchaseInvoicePageController::class, 'index'])->name('index');
+            Route::get('/create', [PurchaseInvoicePageController::class, 'create'])->middleware('permission:purchase-invoices.create')->name('create');
+            Route::get('/{purchaseInvoice}/print', [PurchaseInvoicePageController::class, 'print'])->middleware('permission:purchase-invoices.print')->name('print');
+            Route::get('/{purchaseInvoice}', [PurchaseInvoicePageController::class, 'show'])->name('show');
+            Route::get('/{purchaseInvoice}/edit', [PurchaseInvoicePageController::class, 'edit'])->middleware('permission:purchase-invoices.update')->name('edit');
         });
 });
 

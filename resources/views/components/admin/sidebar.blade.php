@@ -7,6 +7,12 @@
         'sales-collections.view',
     ]) ?? false;
 
+    $canAnyPurchasingMenu = auth()->user()?->canAny([
+        'purchasing.view',
+        'purchase-orders.view',
+        'purchase-invoices.view',
+    ]) ?? false;
+
     $navigation = [
         ['label' => 'Dashboard', 'permission' => 'dashboard.view', 'url' => route('dashboard'), 'active' => request()->routeIs('dashboard'), 'icon' => 'M3 13.5V6a1.5 1.5 0 0 1 1.5-1.5h2.25A1.5 1.5 0 0 1 8.25 6v7.5A1.5 1.5 0 0 1 6.75 15H4.5A1.5 1.5 0 0 1 3 13.5Zm7.5 0V10.5A1.5 1.5 0 0 1 12 9h2.25a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H12a1.5 1.5 0 0 1-1.5-1.5Zm7.5 0V4.5A1.5 1.5 0 0 1 19.5 3h2.25A1.5 1.5 0 0 1 23.25 4.5v9A1.5 1.5 0 0 1 21.75 15H19.5A1.5 1.5 0 0 1 18 13.5Z'],
         [
@@ -47,7 +53,17 @@
             ],
         ],
      
-        ['label' => 'Purchasing', 'permission' => 'purchasing.view', 'url' => '#', 'active' => false, 'icon' => 'M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z'],
+        [
+            'label' => 'Purchasing',
+            'permission' => 'dashboard.view',
+            'visible' => $canAnyPurchasingMenu,
+            'active' => request()->routeIs('purchasing.orders.*') || request()->routeIs('purchasing.invoices.*'),
+            'icon' => 'M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z',
+            'children' => [
+                ['label' => 'Purchase Order', 'permission' => 'purchase-orders.view', 'url' => route('purchasing.orders.index'), 'active' => request()->routeIs('purchasing.orders.*')],
+                ['label' => 'Purchase Invoice', 'permission' => 'purchase-invoices.view', 'url' => route('purchasing.invoices.index'), 'active' => request()->routeIs('purchasing.invoices.*')],
+            ],
+        ],
         
         ['label' => 'Inventory', 'permission' => 'inventory.view', 'url' => '#', 'active' => false, 'icon' => 'M21 7.5 12 2.25 3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25m0-9L3 7.5m9 5.25v9m-9-14.25v9l9 5.25'],
 
@@ -80,7 +96,12 @@
             @if (array_key_exists('visible', $item) && ! $item['visible'])
                 @continue
             @endif
-            @can($item['permission'])
+            @php
+                $canRenderItem = array_key_exists('visible', $item)
+                    ? (bool) $item['visible']
+                    : (auth()->user()?->can($item['permission']) ?? false);
+            @endphp
+            @if ($canRenderItem)
                 @if (isset($item['children']))
                     <div x-data="{ open: {{ ($item['active'] ?? false) ? 'true' : 'false' }} }" class="space-y-1">
                         <button
@@ -124,7 +145,7 @@
                         <span class="truncate" x-show="! sidebarCollapsed">{{ $item['label'] }}</span>
                     </a>
                 @endif
-            @endcan
+            @endif
         @endforeach
     </nav>
 

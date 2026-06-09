@@ -28,6 +28,16 @@ use App\Modules\Quotations\Livewire\QuotationEdit;
 use App\Modules\Quotations\Livewire\QuotationsIndex;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Policies\QuotationPolicy;
+use App\Modules\Purchasing\Livewire\Invoices\Create as PurchaseInvoiceCreate;
+use App\Modules\Purchasing\Livewire\Invoices\Edit as PurchaseInvoiceEdit;
+use App\Modules\Purchasing\Livewire\Invoices\Index as PurchaseInvoiceIndex;
+use App\Modules\Purchasing\Livewire\Orders\Create as PurchaseOrderCreate;
+use App\Modules\Purchasing\Livewire\Orders\Edit as PurchaseOrderEdit;
+use App\Modules\Purchasing\Livewire\Orders\Index as PurchaseOrderIndex;
+use App\Modules\Purchasing\Models\PurchaseInvoice;
+use App\Modules\Purchasing\Models\PurchaseOrder;
+use App\Modules\Purchasing\Policies\PurchaseInvoicePolicy;
+use App\Modules\Purchasing\Policies\PurchaseOrderPolicy;
 use App\Modules\Sales\Livewire\Orders\Create as SalesOrderCreate;
 use App\Modules\Sales\Livewire\Orders\Edit as SalesOrderEdit;
 use App\Modules\Sales\Livewire\Orders\Index as SalesOrderIndex;
@@ -79,6 +89,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(SalesOrder::class, SalesOrderPolicy::class);
         Gate::policy(DeliveryReceipt::class, DeliveryReceiptPolicy::class);
         Gate::policy(SalesInvoice::class, SalesInvoicePolicy::class);
+        Gate::policy(PurchaseOrder::class, PurchaseOrderPolicy::class);
+        Gate::policy(PurchaseInvoice::class, PurchaseInvoicePolicy::class);
 
         Livewire::component('business-partners.client-index', ClientIndex::class);
         Livewire::component('business-partners.client-create', ClientCreate::class);
@@ -110,6 +122,12 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('sales.invoices.edit', SalesInvoiceEdit::class);
         Livewire::component('sales.collections.index', SalesCollectionIndex::class);
         Livewire::component('sales.collections.create', SalesCollectionCreate::class);
+        Livewire::component('purchasing.orders.index', PurchaseOrderIndex::class);
+        Livewire::component('purchasing.orders.create', PurchaseOrderCreate::class);
+        Livewire::component('purchasing.orders.edit', PurchaseOrderEdit::class);
+        Livewire::component('purchasing.invoices.index', PurchaseInvoiceIndex::class);
+        Livewire::component('purchasing.invoices.create', PurchaseInvoiceCreate::class);
+        Livewire::component('purchasing.invoices.edit', PurchaseInvoiceEdit::class);
         Livewire::component('user-management.users-index', UsersIndex::class);
 
         $this->app->booted(function (): void {
