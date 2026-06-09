@@ -20,8 +20,8 @@
             @forelse ($recentLogs as $log)
                 <tr class="hover:bg-slate-50">
                     <td class="whitespace-nowrap border border-slate-300 px-4 py-3 text-slate-700">
-                        <p class="font-medium">{{ $log->created_at?->timezone(config('app.timezone'))->format('M d, Y') }}</p>
-                        <p class="text-xs text-slate-500">{{ $log->created_at?->timezone(config('app.timezone'))->format('h:i A') }}</p>
+                        <p class="font-medium">{{ $log->created_at?->format('M d, Y') }}</p>
+                        <p class="text-xs text-slate-500">{{ $log->created_at?->format('h:i A') }}</p>
                     </td>
                     <td class="border border-slate-300 px-4 py-3 font-semibold text-slate-800">
                         {{ str($log->module)->headline() }}
