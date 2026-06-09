@@ -187,6 +187,6 @@ class Edit extends Component
 
     private function defaultRemarksTemplate(): string
     {
-        return "*Notes\n\n    1. Items not included Packaging, Inventory\n    2. Advanced payment of 30% balance in one month\n    3. Minimum Quantity 2000, pieces.";
+        return "*Notes\n\n1. Price are Vat exclusive\n2. 30 Days Terms of Payment\n3. All Prices are Negotiable";
     }
 }
