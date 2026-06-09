@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/system/heartbeat', fn () => response()->noContent())->name('system.heartbeat');
 
     Route::get('/dashboard', DashboardController::class)->middleware(['permission:dashboard.view'])->name('dashboard');
+    Route::get('/dashboard/transaction-logs', [DashboardController::class, 'transactionLogs'])->middleware(['permission:dashboard.view'])->name('dashboard.transaction-logs');
 
     Route::prefix('user-management')
         ->name('user-management.')
