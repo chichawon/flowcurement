@@ -123,43 +123,29 @@
                     <span class="text-sm font-semibold text-slate-700">Max {{ $compactMoney($maxMonthlyCollection) }}</span>
                 </div>
                 <div class="px-5 py-5">
-                    <div style="display: flex; gap: 16px; align-items: flex-start;">
-                        <div class="shrink-0" style="position: relative; width: 84px; height: 280px;">
-                            @foreach ([1, .75, .5, .25, 0] as $tick)
-                            <div class="text-xs font-medium text-slate-500" style="position: absolute; right: 0; width: 100%; top: {{ (1 - $tick) * 100 }}%; transform: translateY(-50%); text-align: right;">
-                                {{ $compactMoney($maxMonthlyCollection * $tick) }}
+                    <div style="width: 100%; min-width: 0;">
+                        <div class="border-b border-l border-slate-200" style="position: relative; height: 280px;">
+                            <div style="position: absolute; inset: 0; background-image: linear-gradient(to bottom, rgba(203, 213, 225, .65) 1px, transparent 1px); background-size: 100% 25%;"></div>
+
+                            <div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px; align-items: end; padding: 32px 12px 0;">
+                                @foreach ($monthlyCollections as $index => $total)
+                                @php
+                                $height = (float) $total > 0 ? max(5, ((float) $total / $maxMonthlyCollection) * 100) : 0;
+                                @endphp
+                                <div style="position: relative; z-index: 1; display: flex; align-items: end; justify-content: center; height: 100%; min-width: 0;">
+                                    <div
+                                        class="w-full rounded-t-md shadow-sm"
+                                        style="height: {{ $height }}%; max-width: 42px; background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);"
+                                        title="{{ $monthLabels[$index] }}: {{ $money($total) }}"></div>
+                                </div>
+                                @endforeach
                             </div>
-                            @endforeach
                         </div>
 
-                        <div style="min-width: 0; flex: 1; overflow-x: auto; overflow-y: hidden;">
-                            <div style="min-width: 720px;">
-                                <div class="border-b border-l border-slate-200" style="position: relative; height: 280px;">
-                                    <div
-                                        style="position: absolute; inset: 0; background-image: linear-gradient(to bottom, rgba(203, 213, 225, .75) 1px, transparent 1px); background-size: 100% 25%;"></div>
-
-                                    <div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 12px; align-items: end; padding: 32px 16px 0;">
-                                        @foreach ($monthlyCollections as $index => $total)
-                                        @php
-                                        $height = (float) $total > 0 ? max(5, ((float) $total / $maxMonthlyCollection) * 100) : 0;
-                                        $labelBottom = min($height, 88);
-                                        @endphp
-                                        <div style="position: relative; z-index: 1; display: flex; align-items: end; justify-content: center; height: 100%; min-width: 0;">
-                                            <div
-                                                class="w-full max-w-11 rounded-t-md shadow-sm"
-                                                style="height: {{ $height }}%; background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);"
-                                                title="{{ $monthLabels[$index] }}: {{ $money($total) }}"></div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                <div class="px-4 pt-3" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 12px;">
-                                    @foreach ($monthLabels as $monthLabel)
-                                    <span class="text-center text-[11px] font-medium text-slate-500">{{ $monthLabel }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
+                        <div class="px-3 pt-3" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 10px;">
+                            @foreach ($monthLabels as $monthLabel)
+                            <span class="text-center text-[11px] font-medium text-slate-500">{{ $monthLabel }}</span>
+                            @endforeach
                         </div>
                     </div>
                 </div>
