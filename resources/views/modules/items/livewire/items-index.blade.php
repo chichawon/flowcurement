@@ -1,4 +1,7 @@
-<div class="space-y-5">
+<div
+    class="space-y-5"
+    x-data="{ imagePreviewOpen: false, imagePreviewUrl: '', imagePreviewTitle: '' }"
+>
     <section class="erp-panel">
         <div class="erp-panel-header flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -192,7 +195,14 @@
                                     <div class="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-3">
                                         <div class="overflow-hidden rounded-md border border-slate-200 bg-slate-50">
                                             @if ($item->item_image)
-                                                <img src="{{ \App\Modules\Items\Helpers\ItemImage::url($item->item_image) }}" alt="{{ $item->item_name }}" class="size-12 bg-white object-contain">
+                                                <button
+                                                    type="button"
+                                                    class="block size-12 bg-white transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
+                                                    x-on:click="imagePreviewUrl = @js(\App\Modules\Items\Helpers\ItemImage::url($item->item_image)); imagePreviewTitle = @js($item->item_name); imagePreviewOpen = true"
+                                                    title="Preview item image"
+                                                >
+                                                    <img src="{{ \App\Modules\Items\Helpers\ItemImage::url($item->item_image) }}" alt="{{ $item->item_name }}" class="size-12 bg-white object-contain">
+                                                </button>
                                             @else
                                                 <div class="grid size-12 place-items-center bg-slate-100 text-xs font-semibold text-slate-400">{{ strtoupper(substr($item->item_name, 0, 1)) }}</div>
                                             @endif
@@ -283,6 +293,36 @@
             @endif
         </div>
     </section>
+
+    <div
+        x-show="imagePreviewOpen"
+        x-transition.opacity
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0"
+        role="dialog"
+        aria-modal="true"
+    >
+        <div class="absolute inset-0 bg-slate-950/70" x-on:click="imagePreviewOpen = false"></div>
+
+        <div class="relative w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                <div class="min-w-0">
+                    <h3 class="truncate text-base font-semibold text-slate-950" x-text="imagePreviewTitle || 'Item Image'"></h3>
+                    <p class="mt-1 text-sm text-slate-500">Image preview</p>
+                </div>
+                <button type="button" class="inline-flex size-9 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50" x-on:click="imagePreviewOpen = false" aria-label="Close image preview">
+                    <svg class="size-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M5.22 5.22a.75.75 0 0 1 1.06 0L10 8.94l3.72-3.72a.75.75 0 1 1 1.06 1.06L11.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06L10 11.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06L8.94 10 5.22 6.28a.75.75 0 0 1 0-1.06Z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="bg-slate-50 p-5">
+                <div class="flex h-[28rem] items-center justify-center rounded-lg border border-slate-200 bg-white">
+                    <img x-bind:src="imagePreviewUrl" x-bind:alt="imagePreviewTitle" class="max-h-full max-w-full object-contain">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div
         x-data="{ open: @entangle('showDeleteConfirmation').live }"

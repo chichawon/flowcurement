@@ -4,11 +4,13 @@ use App\Http\Controllers\BusinessPartnerPageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryReceiptPageController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InventoryPageController;
 use App\Http\Controllers\ItemPageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseInvoicePageController;
 use App\Http\Controllers\PurchaseOrderPageController;
 use App\Http\Controllers\QuotationPageController;
+use App\Http\Controllers\ReportPageController;
 use App\Http\Controllers\SalesInvoicePageController;
 use App\Http\Controllers\SalesCollectionPageController;
 use App\Http\Controllers\SalesOrderPageController;
@@ -153,6 +155,27 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::get('/{purchaseInvoice}/print', [PurchaseInvoicePageController::class, 'print'])->middleware('permission:purchase-invoices.print')->name('print');
             Route::get('/{purchaseInvoice}', [PurchaseInvoicePageController::class, 'show'])->name('show');
             Route::get('/{purchaseInvoice}/edit', [PurchaseInvoicePageController::class, 'edit'])->middleware('permission:purchase-invoices.update')->name('edit');
+        });
+
+    Route::prefix('inventory')
+        ->name('inventory.')
+        ->middleware(['permission:inventory.view'])
+        ->group(function (): void {
+            Route::get('/', [InventoryPageController::class, 'stockIndex'])->name('index');
+            Route::get('/stock', [InventoryPageController::class, 'stockIndex'])->name('stock.index');
+            Route::get('/movements', [InventoryPageController::class, 'movementsIndex'])->name('movements.index');
+            Route::get('/adjustments/create', [InventoryPageController::class, 'adjustmentCreate'])
+                ->middleware('permission:inventory.update|inventory.create')
+                ->name('adjustments.create');
+        });
+
+    Route::prefix('reports')
+        ->name('reports.')
+        ->middleware(['permission:reports.view'])
+        ->group(function (): void {
+            Route::get('/', [ReportPageController::class, 'index'])->name('index');
+            Route::get('/top-business-partners', [ReportPageController::class, 'topBusinessPartners'])->name('top-business-partners');
+            Route::get('/company-top-ordered-items', [ReportPageController::class, 'companyTopOrderedItems'])->name('company-top-ordered-items');
         });
 });
 

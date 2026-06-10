@@ -12,6 +12,9 @@ use App\Modules\BusinessPartners\Livewire\SupplierEdit;
 use App\Modules\BusinessPartners\Livewire\SupplierIndex;
 use App\Modules\BusinessPartners\Models\BusinessPartner;
 use App\Modules\BusinessPartners\Policies\BusinessPartnerPolicy;
+use App\Modules\Inventory\Livewire\AdjustmentCreate as InventoryAdjustmentCreate;
+use App\Modules\Inventory\Livewire\MovementsIndex as InventoryMovementsIndex;
+use App\Modules\Inventory\Livewire\StockIndex as InventoryStockIndex;
 use App\Modules\Items\Livewire\ItemCreate;
 use App\Modules\Items\Livewire\ItemEdit;
 use App\Modules\Items\Livewire\ImportItemCreate;
@@ -28,6 +31,9 @@ use App\Modules\Quotations\Livewire\QuotationEdit;
 use App\Modules\Quotations\Livewire\QuotationsIndex;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Policies\QuotationPolicy;
+use App\Modules\Reports\Livewire\CompanyTopOrderedItems;
+use App\Modules\Reports\Livewire\ReportsIndex;
+use App\Modules\Reports\Livewire\TopBusinessPartners;
 use App\Modules\Purchasing\Livewire\Invoices\Create as PurchaseInvoiceCreate;
 use App\Modules\Purchasing\Livewire\Invoices\Edit as PurchaseInvoiceEdit;
 use App\Modules\Purchasing\Livewire\Invoices\Index as PurchaseInvoiceIndex;
@@ -107,6 +113,9 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('items.import-index', ImportItemsIndex::class);
         Livewire::component('items.import-create', ImportItemCreate::class);
         Livewire::component('items.import-edit', ImportItemEdit::class);
+        Livewire::component('inventory.stock-index', InventoryStockIndex::class);
+        Livewire::component('inventory.movements-index', InventoryMovementsIndex::class);
+        Livewire::component('inventory.adjustment-create', InventoryAdjustmentCreate::class);
         Livewire::component('quotations.index', QuotationsIndex::class);
         Livewire::component('quotations.create', QuotationCreate::class);
         Livewire::component('quotations.edit', QuotationEdit::class);
@@ -128,6 +137,9 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('purchasing.invoices.index', PurchaseInvoiceIndex::class);
         Livewire::component('purchasing.invoices.create', PurchaseInvoiceCreate::class);
         Livewire::component('purchasing.invoices.edit', PurchaseInvoiceEdit::class);
+        Livewire::component('reports.index', ReportsIndex::class);
+        Livewire::component('reports.top-business-partners', TopBusinessPartners::class);
+        Livewire::component('reports.company-top-ordered-items', CompanyTopOrderedItems::class);
         Livewire::component('user-management.users-index', UsersIndex::class);
 
         $this->app->booted(function (): void {
